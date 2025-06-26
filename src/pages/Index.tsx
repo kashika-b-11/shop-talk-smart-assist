@@ -20,8 +20,8 @@ const Index = () => {
         {
           id: '1',
           name: 'Sweet Baby Ray\'s Barbecue Sauce',
-          price: 2.48,
-          image: '/placeholder.svg',
+          price: 206, // Converted to Rupees (2.48 * 83)
+          image: 'https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=400&h=400&fit=crop',
           inStock: true,
           storeAvailability: 'In Stock - Aisle A12',
           onlineAvailability: 'Available for Pickup',
@@ -31,8 +31,8 @@ const Index = () => {
         {
           id: '2',
           name: 'Wonder Bread Hamburger Buns',
-          price: 1.98,
-          image: '/placeholder.svg',
+          price: 164, // Converted to Rupees (1.98 * 83)
+          image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
           inStock: true,
           storeAvailability: 'In Stock - Bakery Section',
           onlineAvailability: 'Available for Delivery',
@@ -42,8 +42,8 @@ const Index = () => {
         {
           id: '3',
           name: 'Heinz Ketchup',
-          price: 3.24,
-          image: '/placeholder.svg',
+          price: 269, // Converted to Rupees (3.24 * 83)
+          image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop',
           inStock: false,
           storeAvailability: 'Out of Stock',
           onlineAvailability: 'Available for Shipping',

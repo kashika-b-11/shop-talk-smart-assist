@@ -69,7 +69,7 @@ const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
                     </h3>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-[#0071CE]">
-                        ${product.price}
+                        ₹{product.price}
                       </div>
                     </div>
                   </div>
