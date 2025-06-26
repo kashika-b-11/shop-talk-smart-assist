@@ -16,7 +16,7 @@ const Header = () => {
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2 text-sm">
               <MapPin size={16} />
-              <span className="hidden sm:inline">Store #1234 - MG Road, Bangalore, Karnataka 560001</span>
+              <span className="hidden sm:inline">Store #1234 - MG Road, Bangalore, Karnataka 560001, India</span>
             </div>
             <Cart />
             <AuthDialog />

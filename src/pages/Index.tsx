@@ -1,60 +1,47 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatInterface from '@/components/ChatInterface';
 import ProductGrid from '@/components/ProductGrid';
 import VoiceInput from '@/components/VoiceInput';
 import Header from '@/components/Header';
 import AIFeatures from '@/components/AIFeatures';
 import { Product } from '@/types/product';
+import { generateRandomProducts, searchProducts } from '@/services/productService';
 
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Generate initial random products
+  useEffect(() => {
+    setProducts(generateRandomProducts(6));
+  }, []);
+
+  // Refresh products periodically to show different items
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (products.length > 0) {
+        setProducts(generateRandomProducts(6));
+      }
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [products.length]);
+
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     console.log('Searching for:', query);
     
-    // Simulate product search with mock data
+    // Simulate search delay
     setTimeout(() => {
-      const mockProducts: Product[] = [
-        {
-          id: '1',
-          name: 'Sweet Baby Ray\'s Barbecue Sauce',
-          price: 206, // Converted to Rupees (2.48 * 83)
-          image: 'https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=400&h=400&fit=crop',
-          inStock: true,
-          storeAvailability: 'In Stock - Aisle A12',
-          onlineAvailability: 'Available for Pickup',
-          rating: 4.5,
-          description: 'Original barbecue sauce with sweet and tangy flavor'
-        },
-        {
-          id: '2',
-          name: 'Wonder Bread Hamburger Buns',
-          price: 164, // Converted to Rupees (1.98 * 83)
-          image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
-          inStock: true,
-          storeAvailability: 'In Stock - Bakery Section',
-          onlineAvailability: 'Available for Delivery',
-          rating: 4.2,
-          description: 'Soft hamburger buns, pack of 8'
-        },
-        {
-          id: '3',
-          name: 'Heinz Ketchup',
-          price: 269, // Converted to Rupees (3.24 * 83)
-          image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop',
-          inStock: false,
-          storeAvailability: 'Out of Stock',
-          onlineAvailability: 'Available for Shipping',
-          rating: 4.7,
-          description: 'Classic tomato ketchup, 32oz bottle'
-        }
-      ];
-      setProducts(mockProducts);
+      const searchResults = searchProducts(query);
+      setProducts(searchResults);
       setIsLoading(false);
     }, 1500);
+  };
+
+  const handleRefreshProducts = () => {
+    setProducts(generateRandomProducts(6));
   };
 
   return (
@@ -68,7 +55,7 @@ const Index = () => {
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Find, compare, and buy products instantly using natural conversation. 
-              Ask me anything like "I need barbecue sauce and buns for tonight's cookout"
+              Ask me anything like "I need ingredients for Indian dinner tonight"
             </p>
           </div>
 
@@ -79,7 +66,11 @@ const Index = () => {
             </div>
             
             <div>
-              <ProductGrid products={products} isLoading={isLoading} />
+              <ProductGrid 
+                products={products} 
+                isLoading={isLoading}
+                onRefresh={handleRefreshProducts}
+              />
             </div>
           </div>
 

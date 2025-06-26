@@ -1,4 +1,5 @@
-import { Star, MapPin, Truck, ShoppingCart, Eye } from 'lucide-react';
+
+import { Star, MapPin, Truck, ShoppingCart, Eye, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 interface ProductGridProps {
   products: Product[];
   isLoading: boolean;
+  onRefresh?: () => void;
 }
 
-const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
+const ProductGrid = ({ products, isLoading, onRefresh }: ProductGridProps) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -28,7 +30,7 @@ const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-gray-900">Searching products...</h2>
         <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="p-4 animate-pulse">
               <div className="flex space-x-4">
                 <div className="w-20 h-20 bg-gray-200 rounded-lg"></div>
@@ -59,9 +61,22 @@ const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">
-        Found {products.length} products
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Found {products.length} products
+        </h2>
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            className="flex items-center space-x-2"
+          >
+            <RefreshCw size={16} />
+            <span>Refresh</span>
+          </Button>
+        )}
+      </div>
       
       <div className="space-y-4">
         {products.map((product) => (
@@ -72,6 +87,10 @@ const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
                   src={product.image}
                   alt={product.name}
                   className="w-24 h-24 object-cover rounded-lg bg-gray-100"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
+                  }}
                 />
                 
                 <div className="flex-1 space-y-2">

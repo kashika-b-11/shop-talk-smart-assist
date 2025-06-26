@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { ShoppingCart, Plus, Minus, Trash2, X } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -15,6 +16,11 @@ import {
 
 const Cart = () => {
   const { items, updateQuantity, removeFromCart, getTotalItems, getTotalPrice } = useCart();
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    navigate('/checkout');
+  };
 
   return (
     <Sheet>
@@ -45,52 +51,61 @@ const Cart = () => {
             </div>
           ) : (
             <>
-              {items.map((item) => (
-                <Card key={item.id} className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-sm">{item.name}</h3>
-                      <p className="text-lg font-bold text-[#0071CE]">₹{item.price}</p>
+              <div className="max-h-96 overflow-y-auto space-y-4">
+                {items.map((item) => (
+                  <Card key={item.id} className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm line-clamp-2">{item.name}</h3>
+                        <p className="text-lg font-bold text-[#0071CE]">₹{item.price}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeFromCart(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
               
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-semibold">Total:</span>
                   <span className="text-xl font-bold text-[#0071CE]">₹{getTotalPrice()}</span>
                 </div>
-                <Button className="w-full bg-[#0071CE] hover:bg-blue-700">
+                <Button 
+                  onClick={handleCheckout}
+                  className="w-full bg-[#0071CE] hover:bg-blue-700"
+                >
                   Proceed to Checkout
                 </Button>
               </div>

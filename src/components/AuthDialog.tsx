@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import {
 
 const AuthDialog = () => {
   const { user, login, signup, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -69,8 +71,12 @@ const AuthDialog = () => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Orders</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/profile')}>
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/profile')}>
+            Orders
+          </DropdownMenuItem>
           <DropdownMenuItem>Settings</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={logout}>
