@@ -1,11 +1,87 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from 'react';
+import ChatInterface from '@/components/ChatInterface';
+import ProductGrid from '@/components/ProductGrid';
+import VoiceInput from '@/components/VoiceInput';
+import Header from '@/components/Header';
+import { Product } from '@/types/product';
 
 const Index = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSearch = async (query: string) => {
+    setIsLoading(true);
+    console.log('Searching for:', query);
+    
+    // Simulate product search with mock data
+    setTimeout(() => {
+      const mockProducts: Product[] = [
+        {
+          id: '1',
+          name: 'Sweet Baby Ray\'s Barbecue Sauce',
+          price: 2.48,
+          image: '/placeholder.svg',
+          inStock: true,
+          storeAvailability: 'In Stock - Aisle A12',
+          onlineAvailability: 'Available for Pickup',
+          rating: 4.5,
+          description: 'Original barbecue sauce with sweet and tangy flavor'
+        },
+        {
+          id: '2',
+          name: 'Wonder Bread Hamburger Buns',
+          price: 1.98,
+          image: '/placeholder.svg',
+          inStock: true,
+          storeAvailability: 'In Stock - Bakery Section',
+          onlineAvailability: 'Available for Delivery',
+          rating: 4.2,
+          description: 'Soft hamburger buns, pack of 8'
+        },
+        {
+          id: '3',
+          name: 'Heinz Ketchup',
+          price: 3.24,
+          image: '/placeholder.svg',
+          inStock: false,
+          storeAvailability: 'Out of Stock',
+          onlineAvailability: 'Available for Shipping',
+          rating: 4.7,
+          description: 'Classic tomato ketchup, 32oz bottle'
+        }
+      ];
+      setProducts(mockProducts);
+      setIsLoading(false);
+    }, 1500);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Shop Smart with Voice & Chat
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Find, compare, and buy products instantly using natural conversation. 
+              Ask me anything like "I need barbecue sauce and buns for tonight's cookout"
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <ChatInterface onSearch={handleSearch} isLoading={isLoading} />
+              <VoiceInput onVoiceInput={handleSearch} />
+            </div>
+            
+            <div>
+              <ProductGrid products={products} isLoading={isLoading} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
