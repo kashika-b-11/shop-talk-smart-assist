@@ -4,6 +4,7 @@ import ChatInterface from '@/components/ChatInterface';
 import ProductGrid from '@/components/ProductGrid';
 import VoiceInput from '@/components/VoiceInput';
 import Header from '@/components/Header';
+import AIFeatures from '@/components/AIFeatures';
 import { Product } from '@/types/product';
 
 const Index = () => {
@@ -81,6 +82,8 @@ const Index = () => {
               <ProductGrid products={products} isLoading={isLoading} />
             </div>
           </div>
+
+          <AIFeatures />
         </div>
       </div>
     </div>

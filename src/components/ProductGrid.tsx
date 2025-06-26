@@ -1,9 +1,10 @@
-
 import { Star, MapPin, Truck, ShoppingCart, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductGridProps {
   products: Product[];
@@ -11,6 +12,17 @@ interface ProductGridProps {
 }
 
 const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -104,6 +116,7 @@ const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
                     <Button 
                       className="flex-1 bg-[#0071CE] hover:bg-blue-700"
                       disabled={!product.inStock}
+                      onClick={() => handleAddToCart(product)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Add to Cart
