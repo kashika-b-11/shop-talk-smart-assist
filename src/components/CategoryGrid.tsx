@@ -60,6 +60,7 @@ const CategoryGrid = ({ onCategorySelect }: CategoryGridProps) => {
   const handleCategoryClick = (categoryName: string) => {
     console.log('Category clicked:', categoryName);
     if (onCategorySelect) {
+      // Pass the exact category name to ensure proper filtering
       onCategorySelect(categoryName);
     }
   };

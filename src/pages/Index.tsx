@@ -17,25 +17,27 @@ import { generateRandomProducts, searchProducts, getProductsByCategory } from '@
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Generate initial random products
   useEffect(() => {
     setProducts(generateRandomProducts(8));
   }, []);
 
-  // Refresh products periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (products.length > 0) {
-        setProducts(generateRandomProducts(8));
-      }
-    }, 45000);
+  // Remove the auto-refresh functionality
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (products.length > 0) {
+  //       setProducts(generateRandomProducts(8));
+  //     }
+  //   }, 45000);
 
-    return () => clearInterval(interval);
-  }, [products.length]);
+  //   return () => clearInterval(interval);
+  // }, [products.length]);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
+    setSearchQuery(query);
     console.log('Searching for:', query);
     
     setTimeout(() => {
@@ -47,6 +49,7 @@ const Index = () => {
 
   const handleCategorySelect = (category: string) => {
     setIsLoading(true);
+    setSearchQuery(`${category} products`);
     console.log('Category selected:', category);
     
     setTimeout(() => {
@@ -88,7 +91,7 @@ const Index = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-7xl mx-auto">
           
-          {/* Shopping Assistant Section - Always Visible */}
+          {/* Shopping Assistant Section - Always Visible with New Layout */}
           <Card className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -99,9 +102,14 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="grid lg:grid-cols-2 gap-6">
-              <ChatInterface onSearch={handleSearch} isLoading={isLoading} />
-              <VoiceInput onVoiceInput={handleSearch} />
+            {/* New Layout: Chat on Left, Voice on Right */}
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <ChatInterface onSearch={handleSearch} isLoading={isLoading} />
+              </div>
+              <div className="lg:col-span-1">
+                <VoiceInput onVoiceInput={handleSearch} />
+              </div>
             </div>
           </Card>
 
@@ -111,9 +119,15 @@ const Index = () => {
           {/* Deals Section */}
           <DealsSection />
 
-          {/* Search Results - Only show when there are search results */}
-          {products.length > 0 && isLoading === false && (
+          {/* Search Results - Show when there are results */}
+          {products.length > 0 && (
             <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {searchQuery ? `Results for "${searchQuery}"` : 'Featured Products'}
+                </h2>
+                <span className="text-sm text-gray-600">Found {products.length} products</span>
+              </div>
               <ProductGrid 
                 products={products} 
                 isLoading={isLoading}

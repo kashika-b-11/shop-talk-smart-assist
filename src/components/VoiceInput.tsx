@@ -32,6 +32,7 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         setTranscript(transcript);
         
         if (event.results[current].isFinal) {
+          console.log('Final transcript:', transcript);
           onVoiceInput(transcript);
           setTranscript('');
         }
@@ -39,12 +40,14 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
+        setTranscript('');
         console.log('Voice recognition ended');
       };
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        setTranscript('');
       };
 
       recognitionRef.current.start();
