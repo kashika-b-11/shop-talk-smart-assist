@@ -10,6 +10,9 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import DeliveryTracking from "./pages/DeliveryTracking";
+import DeliveryOptions from "./pages/DeliveryOptions";
+import StoreLocator from "./pages/StoreLocator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +30,9 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
+              <Route path="/delivery-tracking" element={<DeliveryTracking />} />
+              <Route path="/delivery-options" element={<DeliveryOptions />} />
+              <Route path="/store-locator" element={<StoreLocator />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

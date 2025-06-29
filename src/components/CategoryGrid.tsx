@@ -1,7 +1,11 @@
 
 import { Card } from '@/components/ui/card';
 
-const CategoryGrid = () => {
+interface CategoryGridProps {
+  onCategorySelect?: (category: string) => void;
+}
+
+const CategoryGrid = ({ onCategorySelect }: CategoryGridProps) => {
   const categories = [
     {
       id: 1,
@@ -53,6 +57,13 @@ const CategoryGrid = () => {
     }
   ];
 
+  const handleCategoryClick = (categoryName: string) => {
+    console.log('Category clicked:', categoryName);
+    if (onCategorySelect) {
+      onCategorySelect(categoryName);
+    }
+  };
+
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
@@ -61,6 +72,7 @@ const CategoryGrid = () => {
           <Card 
             key={category.id} 
             className="p-4 hover:shadow-lg transition-shadow cursor-pointer group"
+            onClick={() => handleCategoryClick(category.name)}
           >
             <div className="text-center space-y-2">
               <div className="w-16 h-16 mx-auto rounded-full overflow-hidden bg-gray-100">

@@ -12,7 +12,7 @@ import DealsSection from '@/components/DealsSection';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Product } from '@/types/product';
-import { generateRandomProducts, searchProducts } from '@/services/productService';
+import { generateRandomProducts, searchProducts, getProductsByCategory } from '@/services/productService';
 
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,6 +43,17 @@ const Index = () => {
       setProducts(searchResults);
       setIsLoading(false);
     }, 1500);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setIsLoading(true);
+    console.log('Category selected:', category);
+    
+    setTimeout(() => {
+      const categoryProducts = getProductsByCategory(category);
+      setProducts(categoryProducts);
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleRefreshProducts = () => {
@@ -95,7 +106,7 @@ const Index = () => {
           </Card>
 
           {/* Categories Section */}
-          <CategoryGrid />
+          <CategoryGrid onCategorySelect={handleCategorySelect} />
 
           {/* Deals Section */}
           <DealsSection />
