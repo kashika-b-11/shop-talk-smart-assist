@@ -11,9 +11,10 @@ interface ProductGridProps {
   products: Product[];
   isLoading: boolean;
   onRefresh?: () => void;
+  gridLayout?: 'compact' | 'large';
 }
 
-const ProductGrid = ({ products, isLoading, onRefresh }: ProductGridProps) => {
+const ProductGrid = ({ products, isLoading, onRefresh, gridLayout = 'compact' }: ProductGridProps) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -29,11 +30,17 @@ const ProductGrid = ({ products, isLoading, onRefresh }: ProductGridProps) => {
     return (
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-gray-900">Searching products...</h2>
-        <div className="grid gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div className={`grid gap-4 ${
+          gridLayout === 'large' 
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' 
+            : 'grid-cols-1'
+        }`}>
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <Card key={i} className="p-4 animate-pulse">
-              <div className="flex space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-lg"></div>
+              <div className={gridLayout === 'large' ? 'space-y-4' : 'flex space-x-4'}>
+                <div className={`bg-gray-200 rounded-lg ${
+                  gridLayout === 'large' ? 'w-full h-48' : 'w-20 h-20'
+                }`}></div>
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                   <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -59,6 +66,95 @@ const ProductGrid = ({ products, isLoading, onRefresh }: ProductGridProps) => {
     );
   }
 
+  if (gridLayout === 'large') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Found {products.length} products
+          </h2>
+          {onRefresh && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw size={16} />
+              <span>Refresh</span>
+            </Button>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
+              <div className="relative">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
+                  }}
+                />
+                {product.inStock && (
+                  <Badge className="absolute top-2 left-2 bg-green-100 text-green-800">
+                    In Stock
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="p-4 space-y-3">
+                <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm">
+                  {product.name}
+                </h3>
+                
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">{product.rating}</span>
+                  </div>
+                </div>
+                
+                <div className="text-2xl font-bold text-[#0071CE]">
+                  ₹{product.price.toLocaleString()}
+                </div>
+                
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div className="flex items-center space-x-1">
+                    <MapPin className="w-3 h-3" />
+                    <span className="truncate">{product.storeAvailability}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Truck className="w-3 h-3" />
+                    <span>{product.onlineAvailability}</span>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    className="flex-1 bg-[#0071CE] hover:bg-blue-700 text-sm"
+                    disabled={!product.inStock}
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1" />
+                    Add to Cart
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Original compact layout for search results
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -100,7 +196,7 @@ const ProductGrid = ({ products, isLoading, onRefresh }: ProductGridProps) => {
                     </h3>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-[#0071CE]">
-                        ₹{product.price}
+                        ₹{product.price.toLocaleString()}
                       </div>
                     </div>
                   </div>

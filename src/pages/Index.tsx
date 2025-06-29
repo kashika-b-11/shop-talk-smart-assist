@@ -1,29 +1,36 @@
 
 import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Star, Truck, ShieldCheck } from 'lucide-react';
 import ChatInterface from '@/components/ChatInterface';
 import ProductGrid from '@/components/ProductGrid';
 import VoiceInput from '@/components/VoiceInput';
 import Header from '@/components/Header';
 import AIFeatures from '@/components/AIFeatures';
+import HeroBanner from '@/components/HeroBanner';
+import CategoryGrid from '@/components/CategoryGrid';
+import DealsSection from '@/components/DealsSection';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Product } from '@/types/product';
 import { generateRandomProducts, searchProducts } from '@/services/productService';
 
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAssistant, setShowAssistant] = useState(false);
 
   // Generate initial random products
   useEffect(() => {
-    setProducts(generateRandomProducts(6));
+    setProducts(generateRandomProducts(8));
   }, []);
 
-  // Refresh products periodically to show different items
+  // Refresh products periodically
   useEffect(() => {
     const interval = setInterval(() => {
       if (products.length > 0) {
-        setProducts(generateRandomProducts(6));
+        setProducts(generateRandomProducts(8));
       }
-    }, 30000); // Refresh every 30 seconds
+    }, 45000);
 
     return () => clearInterval(interval);
   }, [products.length]);
@@ -32,7 +39,6 @@ const Index = () => {
     setIsLoading(true);
     console.log('Searching for:', query);
     
-    // Simulate search delay
     setTimeout(() => {
       const searchResults = searchProducts(query);
       setProducts(searchResults);
@@ -41,39 +47,86 @@ const Index = () => {
   };
 
   const handleRefreshProducts = () => {
-    setProducts(generateRandomProducts(6));
+    setProducts(generateRandomProducts(8));
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Shop Smart with Voice & Chat
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Find, compare, and buy products instantly using natural conversation. 
-              Ask me anything like "I need ingredients for Indian dinner tonight"
-            </p>
+      
+      {/* Hero Banner Section */}
+      <HeroBanner />
+      
+      {/* Quick Actions Bar */}
+      <div className="bg-white border-b border-gray-200 py-3">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2 text-sm">
+                <Truck className="w-4 h-4 text-[#0071CE]" />
+                <span>Free Delivery on orders above ₹499</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm">
+                <ShieldCheck className="w-4 h-4 text-green-600" />
+                <span>Easy Returns & Exchange</span>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setShowAssistant(!showAssistant)}
+              className="bg-[#0071CE] hover:bg-blue-700"
+            >
+              {showAssistant ? 'Hide Assistant' : 'Open Shopping Assistant'}
+            </Button>
           </div>
+        </div>
+      </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <ChatInterface onSearch={handleSearch} isLoading={isLoading} />
-              <VoiceInput onVoiceInput={handleSearch} />
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          
+          {/* Shopping Assistant Section */}
+          {showAssistant && (
+            <Card className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Your AI Shopping Assistant
+                </h2>
+                <p className="text-gray-600">
+                  Chat or use voice to find exactly what you need. Try: "I need ingredients for pasta dinner"
+                </p>
+              </div>
+              
+              <div className="grid lg:grid-cols-2 gap-6">
+                <ChatInterface onSearch={handleSearch} isLoading={isLoading} />
+                <VoiceInput onVoiceInput={handleSearch} />
+              </div>
+            </Card>
+          )}
+
+          {/* Categories Section */}
+          <CategoryGrid />
+
+          {/* Deals Section */}
+          <DealsSection />
+
+          {/* Featured Products */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
+              <Button variant="outline" onClick={handleRefreshProducts}>
+                View All Products
+              </Button>
             </div>
             
-            <div>
-              <ProductGrid 
-                products={products} 
-                isLoading={isLoading}
-                onRefresh={handleRefreshProducts}
-              />
-            </div>
+            <ProductGrid 
+              products={products} 
+              isLoading={isLoading}
+              onRefresh={handleRefreshProducts}
+              gridLayout="large"
+            />
           </div>
 
+          {/* AI Features */}
           <AIFeatures />
         </div>
       </div>
