@@ -22,26 +22,33 @@ class ShopTalkService {
   };
 
   // Product search with keyword matching
-  searchProducts(query: string): { products: Product[], message: string } {
+  async searchProducts(query: string): Promise<{ products: Product[], message: string }> {
     const cleanQuery = query.toLowerCase().trim();
     
     // Handle shopping-related queries
     if (this.isShoppingQuery(cleanQuery)) {
-      const products = searchProducts(query);
-      this.state.currentProducts = products;
-      this.state.lastSearchQuery = query;
-      
-      if (products.length === 0) {
+      try {
+        const products = await searchProducts(query);
+        this.state.currentProducts = products;
+        this.state.lastSearchQuery = query;
+        
+        if (products.length === 0) {
+          return {
+            products: [],
+            message: "Sorry, I couldn't find anything matching that. Try searching for categories like 'Electronics', 'Fashion', 'Beauty', or specific items."
+          };
+        }
+        
+        return {
+          products,
+          message: `Found ${products.length} products matching "${query}". You can add any item to your cart by saying "add [product name] to cart".`
+        };
+      } catch (error) {
         return {
           products: [],
-          message: "Sorry, I couldn't find anything matching that. Try searching for categories like 'Electronics', 'Fashion', 'Groceries', or specific items."
+          message: "I'm having trouble searching right now. Please try again in a moment."
         };
       }
-      
-      return {
-        products,
-        message: `Found ${products.length} products matching "${query}". You can add any item to your cart by saying "add [product name] to cart".`
-      };
     } else {
       return {
         products: [],
@@ -149,7 +156,7 @@ class ShopTalkService {
   }
 
   // Process user message and determine intent
-  processMessage(message: string): { type: 'search' | 'cart' | 'checkout' | 'payment' | 'help', response: string, products?: Product[] } {
+  async processMessage(message: string): Promise<{ type: 'search' | 'cart' | 'checkout' | 'payment' | 'help', response: string, products?: Product[] }> {
     const cleanMessage = message.toLowerCase().trim();
 
     // Cart-related commands
@@ -174,7 +181,7 @@ class ShopTalkService {
 
     // Product search
     if (this.isShoppingQuery(cleanMessage)) {
-      const searchResult = this.searchProducts(message);
+      const searchResult = await this.searchProducts(message);
       return { 
         type: 'search', 
         response: searchResult.message, 

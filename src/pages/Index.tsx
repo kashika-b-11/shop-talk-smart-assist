@@ -16,51 +16,66 @@ import { generateRandomProducts, searchProducts, getProductsByCategory } from '@
 
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Generate initial random products
+  // Load initial random products
   useEffect(() => {
-    setProducts(generateRandomProducts(8));
+    const loadInitialProducts = async () => {
+      setIsLoading(true);
+      try {
+        const initialProducts = await generateRandomProducts(8);
+        setProducts(initialProducts);
+      } catch (error) {
+        console.error('Error loading initial products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialProducts();
   }, []);
-
-  // Remove the auto-refresh functionality
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (products.length > 0) {
-  //       setProducts(generateRandomProducts(8));
-  //     }
-  //   }, 45000);
-
-  //   return () => clearInterval(interval);
-  // }, [products.length]);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchQuery(query);
     console.log('Searching for:', query);
     
-    setTimeout(() => {
-      const searchResults = searchProducts(query);
+    try {
+      const searchResults = await searchProducts(query);
       setProducts(searchResults);
+    } catch (error) {
+      console.error('Error searching products:', error);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleCategorySelect = (category: string) => {
+  const handleCategorySelect = async (category: string) => {
     setIsLoading(true);
     setSearchQuery(`${category} products`);
     console.log('Category selected:', category);
     
-    setTimeout(() => {
-      const categoryProducts = getProductsByCategory(category);
+    try {
+      const categoryProducts = await getProductsByCategory(category);
       setProducts(categoryProducts);
+    } catch (error) {
+      console.error('Error loading category products:', error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleRefreshProducts = () => {
-    setProducts(generateRandomProducts(8));
+  const handleRefreshProducts = async () => {
+    setIsLoading(true);
+    try {
+      const refreshedProducts = await generateRandomProducts(8);
+      setProducts(refreshedProducts);
+    } catch (error) {
+      console.error('Error refreshing products:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -91,18 +106,17 @@ const Index = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-7xl mx-auto">
           
-          {/* Shopping Assistant Section - Always Visible with New Layout */}
+          {/* Shopping Assistant Section */}
           <Card className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Your AI Shopping Assistant
               </h2>
               <p className="text-gray-600">
-                Chat or use voice to find exactly what you need. Try: "I need ingredients for pasta dinner"
+                Chat or use voice to find exactly what you need. Try: "I need a smartphone under 30000"
               </p>
             </div>
             
-            {/* New Layout: Chat on Left, Voice on Right */}
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <ChatInterface onSearch={handleSearch} isLoading={isLoading} />
@@ -119,23 +133,25 @@ const Index = () => {
           {/* Deals Section */}
           <DealsSection />
 
-          {/* Search Results - Show when there are results */}
-          {products.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {searchQuery ? `Results for "${searchQuery}"` : 'Featured Products'}
-                </h2>
-                <span className="text-sm text-gray-600">Found {products.length} products</span>
-              </div>
-              <ProductGrid 
-                products={products} 
-                isLoading={isLoading}
-                onRefresh={handleRefreshProducts}
-                gridLayout="compact"
-              />
+          {/* Search Results */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {searchQuery ? `Results for "${searchQuery}"` : 'Featured Products'}
+              </h2>
+              {!isLoading && (
+                <span className="text-sm text-gray-600">
+                  {products.length > 0 ? `Found ${products.length} products` : 'No products found'}
+                </span>
+              )}
             </div>
-          )}
+            <ProductGrid 
+              products={products} 
+              isLoading={isLoading}
+              onRefresh={handleRefreshProducts}
+              gridLayout="compact"
+            />
+          </div>
 
           {/* AI Features */}
           <AIFeatures />

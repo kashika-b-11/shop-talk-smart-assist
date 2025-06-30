@@ -23,15 +23,16 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi! I'm ShopTalk, your Walmart shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Search for laptops under 50000'\n• Add to cart: 'Add iPhone 15 to cart'\n• Check cart: 'Show my cart'\n• Complete orders: 'Checkout'\n\nWhat are you looking for today?",
+      text: "Hi! I'm ShopTalk, your AI shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Search for smartphones under 30000'\n• Add to cart: 'Add iPhone to cart'\n• Check cart: 'Show my cart'\n• Complete orders: 'Checkout'\n\nWhat are you looking for today?",
       isUser: false,
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async () => {
+    if (!inputValue.trim() || isProcessing) return;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -41,26 +42,40 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setIsProcessing(true);
 
-    // Process message with ShopTalk service
-    const result = shopTalkService.processMessage(inputValue);
-    
-    // If it's a search, trigger the product display
-    if (result.type === 'search' && result.products) {
-      onSearch(inputValue);
-    }
+    try {
+      // Process message with ShopTalk service
+      const result = await shopTalkService.processMessage(inputValue);
+      
+      // If it's a search, trigger the product display
+      if (result.type === 'search' && result.products) {
+        onSearch(inputValue);
+      }
 
-    // Add assistant response
-    setTimeout(() => {
-      const assistantMessage: ChatMessage = {
+      // Add assistant response
+      setTimeout(() => {
+        const assistantMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: result.response,
+          isUser: false,
+          timestamp: new Date(),
+          products: result.products
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsProcessing(false);
+      }, 800);
+    } catch (error) {
+      console.error('Error processing message:', error);
+      const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: result.response,
+        text: "I'm having trouble processing your request right now. Please try again.",
         isUser: false,
-        timestamp: new Date(),
-        products: result.products
+        timestamp: new Date()
       };
-      setMessages(prev => [...prev, assistantMessage]);
-    }, 800);
+      setMessages(prev => [...prev, errorMessage]);
+      setIsProcessing(false);
+    }
 
     setInputValue('');
   };
@@ -104,7 +119,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
             </div>
           </div>
         ))}
-        {isLoading && (
+        {(isLoading || isProcessing) && (
           <div className="flex justify-start">
             <div className="bg-gray-100 p-3 rounded-lg">
               <div className="flex space-x-1">
@@ -126,7 +141,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
             onKeyPress={handleKeyPress}
             className="flex-1"
           />
-          <Button onClick={handleSend} disabled={!inputValue.trim() || isLoading}>
+          <Button onClick={handleSend} disabled={!inputValue.trim() || isLoading || isProcessing}>
             <Send size={16} />
           </Button>
         </div>
