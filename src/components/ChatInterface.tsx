@@ -1,15 +1,17 @@
 
 import { useState } from 'react';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { shopTalkService } from '@/services/shoptalkService';
 
 interface ChatMessage {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
+  products?: any[];
 }
 
 interface ChatInterfaceProps {
@@ -21,7 +23,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi! I'm your Walmart shopping assistant. I can help you find products, check inventory, and compare prices. Try asking me something like 'I need ingredients for a barbecue'",
+      text: "Hi! I'm ShopTalk, your Walmart shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Search for laptops under 50000'\n• Add to cart: 'Add iPhone 15 to cart'\n• Check cart: 'Show my cart'\n• Complete orders: 'Checkout'\n\nWhat are you looking for today?",
       isUser: false,
       timestamp: new Date()
     }
@@ -39,18 +41,26 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    onSearch(inputValue);
 
-    // Simulate assistant response
+    // Process message with ShopTalk service
+    const result = shopTalkService.processMessage(inputValue);
+    
+    // If it's a search, trigger the product display
+    if (result.type === 'search' && result.products) {
+      onSearch(inputValue);
+    }
+
+    // Add assistant response
     setTimeout(() => {
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: `I found some great products for "${inputValue}". Check out the results on the right! I can help you compare prices, check store availability, or find alternatives.`,
+        text: result.response,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        products: result.products
       };
       setMessages(prev => [...prev, assistantMessage]);
-    }, 1000);
+    }, 800);
 
     setInputValue('');
   };
@@ -66,8 +76,8 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
     <Card className="h-96 flex flex-col">
       <div className="p-4 border-b bg-[#0071CE] text-white rounded-t-lg">
         <div className="flex items-center space-x-2">
-          <MessageCircle size={20} />
-          <h3 className="font-semibold">Shopping Assistant</h3>
+          <ShoppingCart size={20} />
+          <h3 className="font-semibold">ShopTalk Assistant</h3>
           <div className="ml-auto">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
           </div>
@@ -81,13 +91,13 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
             className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${
+              className={`max-w-[85%] p-3 rounded-lg ${
                 message.isUser
                   ? 'bg-[#0071CE] text-white'
                   : 'bg-gray-100 text-gray-900'
               }`}
             >
-              <p className="text-sm">{message.text}</p>
+              <p className="text-sm whitespace-pre-line">{message.text}</p>
               <p className="text-xs opacity-70 mt-1">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -110,7 +120,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Input
-            placeholder="Ask me anything... 'I need barbecue sauce and buns'"
+            placeholder="Ask me anything... 'Find phones under 20000' or 'Add to cart'"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
