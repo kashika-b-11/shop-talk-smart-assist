@@ -13,6 +13,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import DeliveryTracking from "./pages/DeliveryTracking";
 import DeliveryOptions from "./pages/DeliveryOptions";
 import StoreLocator from "./pages/StoreLocator";
+import CategoryPage from "./pages/CategoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/delivery-tracking" element={<DeliveryTracking />} />
               <Route path="/delivery-options" element={<DeliveryOptions />} />
               <Route path="/store-locator" element={<StoreLocator />} />
+              <Route path="/category/:category" element={<CategoryPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

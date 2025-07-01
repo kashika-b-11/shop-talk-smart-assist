@@ -1,11 +1,10 @@
 
 import { Card } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
-interface CategoryGridProps {
-  onCategorySelect?: (category: string) => void;
-}
+const CategoryGrid = () => {
+  const navigate = useNavigate();
 
-const CategoryGrid = ({ onCategorySelect }: CategoryGridProps) => {
   const categories = [
     {
       id: 1,
@@ -59,10 +58,8 @@ const CategoryGrid = ({ onCategorySelect }: CategoryGridProps) => {
 
   const handleCategoryClick = (categoryName: string) => {
     console.log('Category clicked:', categoryName);
-    if (onCategorySelect) {
-      // Pass the exact category name to ensure proper filtering
-      onCategorySelect(categoryName);
-    }
+    const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and');
+    navigate(`/category/${categorySlug}`);
   };
 
   return (
