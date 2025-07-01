@@ -19,11 +19,12 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = 'en-IN'; // Changed to Indian English for better recognition
 
       recognitionRef.current.onstart = () => {
         setIsListening(true);
         console.log('Voice recognition started');
+        speakText("I'm listening...");
       };
 
       recognitionRef.current.onresult = (event: any) => {
@@ -33,6 +34,10 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         
         if (event.results[current].isFinal) {
           console.log('Final transcript:', transcript);
+          
+          // Provide voice confirmation
+          speakText(`Searching for ${transcript}`);
+          
           onVoiceInput(transcript);
           setTranscript('');
         }
@@ -48,6 +53,14 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
         setTranscript('');
+        
+        if (event.error === 'no-speech') {
+          speakText("I didn't hear anything. Please try again.");
+        } else if (event.error === 'network') {
+          speakText("Network error. Please check your connection.");
+        } else {
+          speakText("Sorry, I couldn't understand. Please try again.");
+        }
       };
 
       recognitionRef.current.start();
@@ -64,20 +77,39 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
 
   const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 0.8;
+      utterance.lang = 'en-IN'; // Indian English accent
       speechSynthesis.speak(utterance);
     }
+  };
+
+  const handleDemoSpeak = () => {
+    const demoMessages = [
+      "Hi! I'm your Walmart shopping assistant. You can ask me to find products by saying things like:",
+      "Find iPhone 13 under 50000",
+      "Show me ethnic kurtas",
+      "Search for basmati rice",
+      "Add shampoo to cart",
+      "What's in my cart?",
+      "How can I help you shop today?"
+    ];
+    
+    const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];
+    speakText(randomMessage);
   };
 
   return (
     <Card className="p-6">
       <div className="text-center space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Voice Assistant</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Voice Shopping Assistant</h3>
         <p className="text-sm text-gray-600">
-          Tap and speak naturally: "I need barbecue sauce and hamburger buns"
+          Tap the mic and say: "Find Redmi Note 13 under 15k" or "Show me kurtas"
         </p>
         
         <div className="flex justify-center space-x-4">
@@ -94,10 +126,11 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
           </Button>
           
           <Button
-            onClick={() => speakText("Hi! I'm your Walmart shopping assistant. How can I help you find products today?")}
+            onClick={handleDemoSpeak}
             size="lg"
             variant="outline"
             className="rounded-full w-16 h-16"
+            title="Hear voice examples"
           >
             <Volume2 size={24} />
           </Button>
@@ -112,11 +145,14 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         )}
         
         {isListening && (
-          <div className="flex justify-center space-x-1">
-            <div className="w-2 h-8 bg-[#0071CE] rounded-full animate-pulse"></div>
-            <div className="w-2 h-6 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-2 h-10 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-4 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+          <div className="space-y-2">
+            <div className="flex justify-center space-x-1">
+              <div className="w-2 h-8 bg-[#0071CE] rounded-full animate-pulse"></div>
+              <div className="w-2 h-6 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-10 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-4 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+            </div>
+            <p className="text-xs text-gray-500">Speak clearly and naturally...</p>
           </div>
         )}
       </div>

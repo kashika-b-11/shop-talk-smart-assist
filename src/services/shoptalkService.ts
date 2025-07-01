@@ -1,4 +1,3 @@
-
 import { Product } from '@/types/product';
 import { searchProducts, getProductsByCategory } from './productService';
 
@@ -21,13 +20,16 @@ class ShopTalkService {
     lastSearchQuery: ''
   };
 
-  // Product search with keyword matching
-  async searchProducts(query: string): Promise<{ products: Product[], message: string }> {
+  // Enhanced product search with better keyword matching for Indian market
+  async searchProducts(query: string): Promise<{ products: Product[], message: string, shouldNavigate?: boolean, navigationPath?: string }> {
     const cleanQuery = query.toLowerCase().trim();
     
     // Handle shopping-related queries
     if (this.isShoppingQuery(cleanQuery)) {
       try {
+        // Check if it's a specific product search that should navigate
+        const specificProductMatch = this.detectSpecificProduct(cleanQuery);
+        
         const products = await searchProducts(query);
         this.state.currentProducts = products;
         this.state.lastSearchQuery = query;
@@ -35,13 +37,32 @@ class ShopTalkService {
         if (products.length === 0) {
           return {
             products: [],
-            message: "Sorry, I couldn't find anything matching that. Try searching for categories like 'Electronics', 'Fashion', 'Beauty', or specific items."
+            message: "Sorry, I couldn't find anything matching that. Try searching for categories like 'Electronics', 'Fashion', 'Beauty', or specific items like 'iPhone', 'kurta', 'rice'."
+          };
+        }
+        
+        let message = `Found ${products.length} products matching "${query}". `;
+        
+        // Add voice confirmation for voice queries
+        if (this.isVoiceQuery(query)) {
+          message = `Great! I found ${products.length} products for you. ` + message;
+        }
+        
+        message += "You can add any item to your cart by saying 'add [product name] to cart'.";
+        
+        // Check if we should navigate to a specific page
+        if (specificProductMatch) {
+          return {
+            products,
+            message,
+            shouldNavigate: true,
+            navigationPath: `/search?q=${encodeURIComponent(query)}`
           };
         }
         
         return {
           products,
-          message: `Found ${products.length} products matching "${query}". You can add any item to your cart by saying "add [product name] to cart".`
+          message
         };
       } catch (error) {
         return {
@@ -57,25 +78,58 @@ class ShopTalkService {
     }
   }
 
-  // Add product to cart
+  // Detect if the query is for a specific product that should navigate
+  private detectSpecificProduct(query: string): boolean {
+    const specificProductKeywords = [
+      'iphone', 'samsung galaxy', 'oneplus', 'redmi', 'mi', 'realme',
+      'nike', 'adidas', 'levis', 'kurta', 'saree', 'jeans',
+      'rice', 'dal', 'oil', 'masala', 'tea', 'coffee',
+      'shampoo', 'face wash', 'lipstick', 'kajal'
+    ];
+    
+    return specificProductKeywords.some(keyword => query.includes(keyword));
+  }
+
+  // Detect if query came from voice input (basic heuristic)
+  private isVoiceQuery(query: string): boolean {
+    // Voice queries often have more natural language patterns
+    const voicePatterns = [
+      'i need', 'i want', 'show me', 'find me', 'looking for',
+      'under', 'below', 'above', 'around', 'approximately'
+    ];
+    
+    return voicePatterns.some(pattern => query.toLowerCase().includes(pattern));
+  }
+
+  // Enhanced add to cart with better product matching
   addToCart(productName: string): string {
-    const product = this.state.currentProducts.find(p => 
-      p.name.toLowerCase().includes(productName.toLowerCase())
+    // Try exact match first
+    let product = this.state.currentProducts.find(p => 
+      p.name.toLowerCase() === productName.toLowerCase()
     );
     
+    // If no exact match, try partial match
     if (!product) {
-      return "I couldn't find that product in the current search results. Please search for the product first.";
+      product = this.state.currentProducts.find(p => 
+        p.name.toLowerCase().includes(productName.toLowerCase()) ||
+        productName.toLowerCase().includes(p.name.toLowerCase().split(' ')[0])
+      );
+    }
+    
+    if (!product) {
+      return `I couldn't find "${productName}" in the current search results. Please search for the product first or try a different name.`;
     }
 
     const existingItem = this.state.cart.find(item => item.id === product.id);
     if (existingItem) {
       existingItem.quantity += 1;
+      return `✅ Added another ${product.name} to your cart. You now have ${existingItem.quantity} items. Would you like to proceed to checkout or continue shopping?`;
     } else {
       this.state.cart.push({ ...product, quantity: 1 });
     }
 
     this.state.currentStep = 'cart';
-    return `✅ ${product.name} has been added to your cart. Would you like to proceed to payment or continue shopping?`;
+    return `✅ ${product.name} has been added to your cart for ₹${product.price.toLocaleString()}. Would you like to proceed to payment or continue shopping?`;
   }
 
   // Get cart contents
@@ -145,10 +199,26 @@ class ShopTalkService {
   // Check if query is shopping-related
   private isShoppingQuery(query: string): boolean {
     const shoppingKeywords = [
-      'buy', 'purchase', 'search', 'find', 'looking for', 'need', 'want',
+      // Action keywords
+      'buy', 'purchase', 'search', 'find', 'looking for', 'need', 'want', 'show me',
+      
+      // Categories
       'electronics', 'fashion', 'groceries', 'beauty', 'sports', 'books', 'toys',
-      'phone', 'laptop', 'dress', 'shoes', 'food', 'milk', 'rice', 'shampoo',
-      'price', 'cost', 'cheap', 'expensive', 'under', 'below', 'above'
+      'home', 'kitchen', 'appliances',
+      
+      // Specific items
+      'phone', 'mobile', 'laptop', 'computer', 'tv', 'fan', 'cooler', 'inverter',
+      'dress', 'shirt', 'jeans', 'kurta', 'saree', 'shoes', 'sandals',
+      'rice', 'dal', 'oil', 'masala', 'tea', 'coffee', 'milk', 'bread',
+      'shampoo', 'soap', 'cream', 'lotion', 'lipstick', 'kajal',
+      
+      // Indian brands
+      'bajaj', 'samsung', 'lg', 'oneplus', 'redmi', 'mi', 'realme',
+      'tata', 'amul', 'britannia', 'maggi', 'himalaya', 'lakme',
+      
+      // Price related
+      'price', 'cost', 'cheap', 'expensive', 'under', 'below', 'above', 'around',
+      'rupees', 'rs', '₹'
     ];
 
     return shoppingKeywords.some(keyword => query.includes(keyword)) || 
@@ -156,7 +226,13 @@ class ShopTalkService {
   }
 
   // Process user message and determine intent
-  async processMessage(message: string): Promise<{ type: 'search' | 'cart' | 'checkout' | 'payment' | 'help', response: string, products?: Product[] }> {
+  async processMessage(message: string): Promise<{ 
+    type: 'search' | 'cart' | 'checkout' | 'payment' | 'help', 
+    response: string, 
+    products?: Product[],
+    shouldNavigate?: boolean,
+    navigationPath?: string 
+  }> {
     const cleanMessage = message.toLowerCase().trim();
 
     // Cart-related commands
@@ -179,20 +255,22 @@ class ShopTalkService {
       return { type: 'payment', response: this.processPayment() };
     }
 
-    // Product search
+    // Product search with enhanced navigation
     if (this.isShoppingQuery(cleanMessage)) {
       const searchResult = await this.searchProducts(message);
       return { 
         type: 'search', 
         response: searchResult.message, 
-        products: searchResult.products 
+        products: searchResult.products,
+        shouldNavigate: searchResult.shouldNavigate,
+        navigationPath: searchResult.navigationPath
       };
     }
 
     // Default response for non-shopping queries
     return { 
       type: 'help', 
-      response: "I'm here to help with shopping-related queries only. Try:\n• Search for products: 'Find laptops under 50000'\n• Add to cart: 'Add iPhone to cart'\n• Check cart: 'Show my cart'\n• Checkout: 'Proceed to checkout'"
+      response: "I'm your shopping assistant! Try:\n• 'Find iPhone under 30000'\n• 'Show me kurtas'\n• 'Add rice to cart'\n• 'Show my cart'\n• 'Checkout my order'\n\nI can understand both text and voice commands!"
     };
   }
 

@@ -1,5 +1,5 @@
 
-import { MapPin, Edit2 } from 'lucide-react';
+import { MapPin, Edit2, Home } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cart from './Cart';
@@ -13,6 +13,10 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
+    navigate('/');
+  };
+
+  const handleHomeClick = () => {
     navigate('/');
   };
 
@@ -31,6 +35,15 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-6">
+            <Button
+              variant="ghost"
+              onClick={handleHomeClick}
+              className="flex items-center space-x-2 text-sm hover:bg-blue-600"
+            >
+              <Home size={16} />
+              <span className="hidden sm:inline">Home</span>
+            </Button>
+            
             <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 text-sm hover:bg-blue-600">

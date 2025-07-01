@@ -14,6 +14,7 @@ import DeliveryTracking from "./pages/DeliveryTracking";
 import DeliveryOptions from "./pages/DeliveryOptions";
 import StoreLocator from "./pages/StoreLocator";
 import CategoryPage from "./pages/CategoryPage";
+import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/search" element={<SearchResults />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { shopTalkService } from '@/services/shoptalkService';
+import { useNavigate } from 'react-router-dom';
 
 interface ChatMessage {
   id: string;
@@ -20,10 +21,11 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi! I'm ShopTalk, your AI shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Search for smartphones under 30000'\n• Add to cart: 'Add iPhone to cart'\n• Check cart: 'Show my cart'\n• Complete orders: 'Checkout'\n\nWhat are you looking for today?",
+      text: "Hi! I'm ShopTalk, your AI shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Find iPhone under 30000' or 'Show me kurtas'\n• Add to cart: 'Add rice to cart'\n• Check cart: 'Show my cart'\n• Complete orders: 'Checkout'\n\nI understand both text and voice commands! What are you looking for today?",
       isUser: false,
       timestamp: new Date()
     }
@@ -48,16 +50,25 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       // Process message with ShopTalk service
       const result = await shopTalkService.processMessage(inputValue);
       
-      // If it's a search, trigger the product display
-      if (result.type === 'search' && result.products) {
+      // Handle navigation if needed
+      if (result.shouldNavigate && result.navigationPath) {
+        navigate(result.navigationPath);
+      } else if (result.type === 'search' && result.products) {
         onSearch(inputValue);
       }
 
-      // Add assistant response
+      // Add assistant response with voice-like confirmation
       setTimeout(() => {
+        let responseText = result.response;
+        
+        // Add voice-like confirmation for voice queries
+        if (inputValue.toLowerCase().includes('find') || inputValue.toLowerCase().includes('search')) {
+          responseText = `🎯 ${responseText}`;
+        }
+
         const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
-          text: result.response,
+          text: responseText,
           isUser: false,
           timestamp: new Date(),
           products: result.products
@@ -135,7 +146,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Input
-            placeholder="Ask me anything... 'Find phones under 20000' or 'Add to cart'"
+            placeholder="Try: 'Find Redmi Note 13 under 15k' or 'Show me ethnic kurtas'"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
