@@ -1,22 +1,33 @@
 
 import React, { useState } from 'react';
-import { ArrowLeft, MapPin, CreditCard, Truck, Calendar } from 'lucide-react';
+import { ArrowLeft, MapPin, CreditCard, Truck, Calendar, QrCode, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 
 const Checkout = () => {
   const { items, getTotalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const [deliveryOption, setDeliveryOption] = useState('delivery');
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: ''
+  });
   const [deliveryAddress, setDeliveryAddress] = useState({
     name: user?.name || '',
     phone: '+91 9876543210',
@@ -27,18 +38,52 @@ const Checkout = () => {
   const deliveryCharge = deliveryOption === 'delivery' ? 40 : 0;
   const totalAmount = getTotalPrice() + deliveryCharge;
 
-  const handlePlaceOrder = () => {
+  const handlePaymentProcess = () => {
+    setShowPaymentDialog(true);
+  };
+
+  const processPayment = async () => {
+    setIsProcessingPayment(true);
+    
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    if (paymentMethod === 'card') {
+      if (!paymentDetails.cardNumber || !paymentDetails.expiryDate || !paymentDetails.cvv) {
+        toast({
+          title: "Payment Error",
+          description: "Please fill in all card details",
+          variant: "destructive"
+        });
+        setIsProcessingPayment(false);
+        return;
+      }
+    }
+    
     // Process order
     console.log('Order placed:', {
       items,
       deliveryOption,
       paymentMethod,
       deliveryAddress,
-      totalAmount
+      totalAmount,
+      paymentDetails: paymentMethod === 'card' ? paymentDetails : null
+    });
+    
+    toast({
+      title: "Payment Successful",
+      description: "Your order has been placed successfully!"
     });
     
     clearCart();
+    setIsProcessingPayment(false);
+    setShowPaymentDialog(false);
     navigate('/order-confirmation');
+  };
+
+  const generateQRCode = () => {
+    // In a real app, this would generate a UPI QR code
+    return `upi://pay?pa=walmart@paytm&pn=Walmart&am=${totalAmount}&cu=INR&tn=Order Payment`;
   };
 
   if (items.length === 0) {
@@ -182,8 +227,20 @@ const Checkout = () => {
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="text-[#0071CE]"
                     />
-                    <div className="w-5 h-5 bg-orange-500 rounded"></div>
+                    <Smartphone size={20} />
                     <span>UPI</span>
+                  </label>
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="qr"
+                      checked={paymentMethod === 'qr'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="text-[#0071CE]"
+                    />
+                    <QrCode size={20} />
+                    <span>QR Code Payment</span>
                   </label>
                   <label className="flex items-center space-x-3 cursor-pointer">
                     <input
@@ -241,7 +298,7 @@ const Checkout = () => {
                 </div>
 
                 <Button
-                  onClick={handlePlaceOrder}
+                  onClick={handlePaymentProcess}
                   className="w-full mt-6 bg-[#0071CE] hover:bg-blue-700"
                 >
                   Place Order - ₹{totalAmount}
@@ -251,6 +308,116 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {paymentMethod === 'card' && 'Enter Card Details'}
+              {paymentMethod === 'upi' && 'UPI Payment'}
+              {paymentMethod === 'qr' && 'QR Code Payment'}
+              {paymentMethod === 'cod' && 'Cash on Delivery'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {paymentMethod === 'card' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="cardNumber">Card Number</Label>
+                  <Input
+                    id="cardNumber"
+                    placeholder="1234 5678 9012 3456"
+                    value={paymentDetails.cardNumber}
+                    onChange={(e) => setPaymentDetails({...paymentDetails, cardNumber: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="expiryDate">Expiry Date</Label>
+                    <Input
+                      id="expiryDate"
+                      placeholder="MM/YY"
+                      value={paymentDetails.expiryDate}
+                      onChange={(e) => setPaymentDetails({...paymentDetails, expiryDate: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cvv">CVV</Label>
+                    <Input
+                      id="cvv"
+                      placeholder="123"
+                      value={paymentDetails.cvv}
+                      onChange={(e) => setPaymentDetails({...paymentDetails, cvv: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="cardholderName">Cardholder Name</Label>
+                  <Input
+                    id="cardholderName"
+                    placeholder="John Doe"
+                    value={paymentDetails.cardholderName}
+                    onChange={(e) => setPaymentDetails({...paymentDetails, cardholderName: e.target.value})}
+                  />
+                </div>
+              </div>
+            )}
+
+            {paymentMethod === 'upi' && (
+              <div className="text-center space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-2">Pay using any UPI app</p>
+                  <p className="font-mono text-lg">walmart@paytm</p>
+                  <p className="text-sm text-gray-500">Amount: ₹{totalAmount}</p>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Complete the payment in your UPI app and click confirm below
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === 'qr' && (
+              <div className="text-center space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="w-48 h-48 mx-auto bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <QrCode size={64} className="mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600">QR Code</p>
+                      <p className="text-xs text-gray-500">₹{totalAmount}</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Scan this QR code with any UPI app to pay
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === 'cod' && (
+              <div className="text-center space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <Calendar size={48} className="mx-auto mb-2 text-gray-600" />
+                  <p className="font-medium">Cash on Delivery</p>
+                  <p className="text-sm text-gray-600">Pay ₹{totalAmount} when your order arrives</p>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Please keep exact change ready for faster delivery
+                </p>
+              </div>
+            )}
+
+            <Button
+              onClick={processPayment}
+              disabled={isProcessingPayment}
+              className="w-full bg-[#0071CE] hover:bg-blue-700"
+            >
+              {isProcessingPayment ? 'Processing...' : `Confirm Payment - ₹${totalAmount}`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

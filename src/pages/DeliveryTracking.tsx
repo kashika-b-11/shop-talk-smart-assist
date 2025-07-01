@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, MapPin, Clock, CheckCircle, Truck, Package } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, CheckCircle, Truck, Package, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,18 +65,28 @@ const DeliveryTracking = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="flex items-center mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/profile')}
-              className="mr-4"
-            >
-              <ArrowLeft size={20} />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">Track Your Order</h1>
-              <p className="text-gray-600">Order #{orderId}</p>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/profile')}
+                className="mr-4"
+              >
+                <ArrowLeft size={20} />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold">Track Your Order</h1>
+                <p className="text-gray-600">Order #{orderId}</p>
+              </div>
             </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2"
+            >
+              <Home size={16} />
+              <span>Home</span>
+            </Button>
           </div>
 
           {/* Delivery Progress */}
