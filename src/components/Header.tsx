@@ -1,6 +1,7 @@
 
 import { MapPin, Edit2 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Cart from './Cart';
 import AuthDialog from './AuthDialog';
 import LocationEditor from './LocationEditor';
@@ -9,13 +10,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 const Header = () => {
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogoClick = () => {
+    navigate('/');
+  };
 
   return (
     <header className="bg-[#0071CE] text-white shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
-            <div className="text-2xl font-bold">Walmart</div>
+            <button 
+              onClick={handleLogoClick}
+              className="text-2xl font-bold hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              Walmart
+            </button>
             <div className="hidden md:block text-sm opacity-90">Smart Shopping Assistant</div>
           </div>
           
