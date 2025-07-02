@@ -10,6 +10,101 @@ const locations = [
   'Anna Nagar, Chennai'
 ];
 
+const productImages = {
+  // Electronics
+  'samsung galaxy m34': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  'hp laptop 15s': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+  'sony wh-ch720n': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+  'bajaj ceiling fan': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
+  'lg refrigerator': 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=400&fit=crop',
+  'whirlpool washing machine': 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400&h=400&fit=crop',
+  'panasonic microwave': 'https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=400&h=400&fit=crop',
+  'voltas air cooler': 'https://images.unsplash.com/photo-1631700611307-37dbcb89ef7e?w=400&h=400&fit=crop',
+  'luminous inverter': 'https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?w=400&h=400&fit=crop',
+  'boat smartwatch': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
+  'iphone': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  'redmi note': 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=400&fit=crop',
+  'oneplus': 'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400&h=400&fit=crop',
+  'laptop': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+  'headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+  'fan': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
+  'television': 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=400&fit=crop',
+  'smartphone': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  
+  // Fashion
+  'cotton kurta set': 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop',
+  'denim jeans': 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop',
+  'silk saree': 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=400&fit=crop',
+  'sports shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop',
+  'formal shirt': 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+  'leather handbag': 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
+  'ethnic dress': 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop',
+  'casual sandals': 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&h=400&fit=crop',
+  'kurta': 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop',
+  'jeans': 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop',
+  'saree': 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=400&fit=crop',
+  'shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop',
+  'shirt': 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+  'dress': 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=400&fit=crop',
+  
+  // Groceries  
+  'basmati rice': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+  'toor dal': 'https://images.unsplash.com/photo-1599909905244-b7e2c08b4135?w=400&h=400&fit=crop',
+  'sunflower oil': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+  'garam masala': 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=400&fit=crop',
+  'organic honey': 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=400&h=400&fit=crop',
+  'green tea': 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop',
+  'instant noodles': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop',
+  'whole wheat flour': 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop',
+  'rice': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+  'dal': 'https://images.unsplash.com/photo-1599909905244-b7e2c08b4135?w=400&h=400&fit=crop',
+  'oil': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+  'masala': 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=400&fit=crop',
+  'honey': 'https://images.unsplash.com/photo-1558642891-54be180ea339?w=400&h=400&fit=crop',
+  'tea': 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop',
+  'bread': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+  'milk': 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop'
+};
+
+// Helper function to get image for product
+const getProductImage = (productName: string): string => {
+  const lowerName = productName.toLowerCase();
+  
+  // Try exact match first
+  if (productImages[lowerName]) {
+    return productImages[lowerName];
+  }
+  
+  // Try partial matches - check if any keyword from product name matches image keys
+  for (const [key, image] of Object.entries(productImages)) {
+    const productWords = lowerName.split(' ');
+    const keyWords = key.split(' ');
+    
+    // Check if any word from product name matches any word in image key
+    if (productWords.some(word => keyWords.includes(word)) || 
+        keyWords.some(word => productWords.includes(word))) {
+      return image;
+    }
+  }
+  
+  // Category-based fallback
+  if (lowerName.includes('phone') || lowerName.includes('mobile') || lowerName.includes('smartphone')) {
+    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop';
+  }
+  if (lowerName.includes('laptop') || lowerName.includes('computer')) {
+    return 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop';
+  }
+  if (lowerName.includes('kurta') || lowerName.includes('ethnic')) {
+    return 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop';
+  }
+  if (lowerName.includes('rice') || lowerName.includes('grain')) {
+    return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop';
+  }
+  
+  // Default fallback
+  return 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
+};
+
 // Enhanced Indian market products with diverse images
 const indianMarketProducts = {
   Electronics: [
@@ -310,7 +405,7 @@ const transformProduct = (apiProduct: any): Product => {
     id: apiProduct.id.toString(),
     name: apiProduct.title,
     price: Math.round(apiProduct.price * 83), // Convert USD to INR approximately
-    image: apiProduct.thumbnail,
+    image: getProductImage(apiProduct.title),
     inStock: apiProduct.stock > 0,
     storeAvailability: locations[Math.floor(Math.random() * locations.length)],
     onlineAvailability: 'Delivery in 2-3 hours',
@@ -421,5 +516,37 @@ export const getCategories = async (): Promise<string[]> => {
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
+  }
+};
+
+// Get all products for infinite scroll
+export const getAllProducts = async (): Promise<Product[]> => {
+  try {
+    // Combine local and API products
+    const allLocalProducts: Product[] = [];
+    
+    // Add all local Indian products
+    Object.entries(indianMarketProducts).forEach(([category, products]) => {
+      products.forEach(product => {
+        allLocalProducts.push(transformLocalProduct(product));
+      });
+    });
+
+    // Add some API products for variety
+    const response = await fetch(`${API_BASE_URL}/products?limit=50`);
+    const data = await response.json();
+    const apiProducts = data.products.map(transformProduct);
+    
+    return [...allLocalProducts, ...apiProducts];
+  } catch (error) {
+    console.error('Error fetching all products:', error);
+    // Return local products as fallback
+    const allLocalProducts: Product[] = [];
+    Object.entries(indianMarketProducts).forEach(([category, products]) => {
+      products.forEach(product => {
+        allLocalProducts.push(transformLocalProduct(product));
+      });
+    });
+    return allLocalProducts;
   }
 };

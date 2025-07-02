@@ -7,16 +7,51 @@ import AIFeatures from '@/components/AIFeatures';
 import HeroBanner from '@/components/HeroBanner';
 import CategoryGrid from '@/components/CategoryGrid';
 import DealsSection from '@/components/DealsSection';
+import InfiniteProductGrid from '@/components/InfiniteProductGrid';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Product } from '@/types/product';
+import { getAllProducts } from '@/services/productService';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   const handleSearch = async (query: string) => {
     console.log('Searching for:', query);
     const searchQuery = encodeURIComponent(query);
     navigate(`/search?q=${searchQuery}`);
+  };
+
+  // Load initial featured products
+  useEffect(() => {
+    const loadFeaturedProducts = async () => {
+      try {
+        const products = await getAllProducts();
+        setFeaturedProducts(products.slice(0, 8)); // Initial 8 products
+      } catch (error) {
+        console.error('Error loading featured products:', error);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    loadFeaturedProducts();
+  }, []);
+
+  // Load more products for infinite scroll
+  const loadMoreProducts = async (page: number): Promise<Product[]> => {
+    try {
+      const allProducts = await getAllProducts();
+      const startIndex = (page - 1) * 8;
+      const endIndex = startIndex + 8;
+      return allProducts.slice(startIndex, endIndex);
+    } catch (error) {
+      console.error('Error loading more products:', error);
+      return [];
+    }
   };
 
   return (
@@ -67,6 +102,18 @@ const Index = () => {
 
           <CategoryGrid />
           <DealsSection />
+          
+          {/* Featured Products with Infinite Scroll */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Products</h2>
+            <InfiniteProductGrid
+              initialProducts={featuredProducts}
+              onLoadMore={loadMoreProducts}
+              hasMore={true}
+              gridLayout="large"
+            />
+          </div>
+          
           <AIFeatures />
         </div>
       </div>

@@ -84,29 +84,45 @@ const LocationEditor = () => {
         const { latitude, longitude } = position.coords;
         
         try {
-          // Use reverse geocoding to get address from coordinates
+          // Use a reliable reverse geocoding service
           const response = await fetch(
-            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=demo_key&limit=1`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'Walmart-Shopping-App'
+              }
+            }
           );
           
           if (response.ok) {
             const data = await response.json();
-            if (data.results && data.results.length > 0) {
-              const address = data.results[0].formatted;
-              setCurrentLocation(address);
+            if (data && data.display_name) {
+              setCurrentLocation(data.display_name);
               toast({
                 title: "Location Found",
                 description: "Your current location has been set successfully.",
               });
             } else {
-              setCurrentLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+              // Fallback to coordinates with city format
+              const coordsLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+              setCurrentLocation(coordsLocation);
+              toast({
+                title: "Location Set",
+                description: "Location coordinates have been set.",
+              });
             }
           } else {
-            setCurrentLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            const coordsLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            setCurrentLocation(coordsLocation);
+            toast({
+              title: "Location Set",
+              description: "Location coordinates have been set.",
+            });
           }
         } catch (error) {
           console.error('Geocoding error:', error);
-          setCurrentLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          const coordsLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          setCurrentLocation(coordsLocation);
           toast({
             title: "Location Set",
             description: "Location coordinates have been set.",
@@ -121,14 +137,14 @@ const LocationEditor = () => {
         let errorMessage = "Unable to retrieve your location.";
         
         switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied by user.";
+          case GeolocationPositionError.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location permissions in your browser.";
             break;
-          case error.POSITION_UNAVAILABLE:
+          case GeolocationPositionError.POSITION_UNAVAILABLE:
             errorMessage = "Location information is unavailable.";
             break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out.";
+          case GeolocationPositionError.TIMEOUT:
+            errorMessage = "Location request timed out. Please try again.";
             break;
         }
         
@@ -141,8 +157,8 @@ const LocationEditor = () => {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
+        timeout: 15000,
+        maximumAge: 300000
       }
     );
   };

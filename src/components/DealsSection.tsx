@@ -74,10 +74,10 @@ const DealsSection = () => {
   };
 
   const handleProductClick = (product: Product) => {
-    // Create a simple product details modal or navigate to product page
+    // Show detailed product info
     toast({
       title: product.name,
-      description: product.description,
+      description: `${product.description}\n\nPrice: ₹${product.price.toLocaleString()}\nRating: ${product.rating}⭐\nAvailable at: ${product.storeAvailability}`,
     });
   };
 
