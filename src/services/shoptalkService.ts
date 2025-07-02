@@ -1,3 +1,4 @@
+
 import { Product } from '@/types/product';
 import { searchProducts, getProductsByCategory } from './productService';
 
@@ -20,79 +21,116 @@ class ShopTalkService {
     lastSearchQuery: ''
   };
 
-  // Enhanced product search with better keyword matching for Indian market
+  // Enhanced product search with better keyword matching
   async searchProducts(query: string): Promise<{ products: Product[], message: string, shouldNavigate?: boolean, navigationPath?: string }> {
     const cleanQuery = query.toLowerCase().trim();
     
     // Handle shopping-related queries
     if (this.isShoppingQuery(cleanQuery)) {
       try {
-        // Check if it's a specific product search that should navigate
-        const specificProductMatch = this.detectSpecificProduct(cleanQuery);
+        console.log('Searching for products with query:', query);
         
         const products = await searchProducts(query);
         this.state.currentProducts = products;
         this.state.lastSearchQuery = query;
         
+        console.log('Search results:', products.length, 'products found');
+        
         if (products.length === 0) {
+          // Try alternative search terms
+          const alternativeResults = await this.tryAlternativeSearch(cleanQuery);
+          if (alternativeResults.length > 0) {
+            this.state.currentProducts = alternativeResults;
+            return {
+              products: alternativeResults,
+              message: `I found ${alternativeResults.length} related products for "${query}". You can add any item to your cart!`,
+              shouldNavigate: true,
+              navigationPath: `/search?q=${encodeURIComponent(query)}`
+            };
+          }
+          
           return {
             products: [],
-            message: "Sorry, I couldn't find anything matching that. Try searching for categories like 'Electronics', 'Fashion', 'Beauty', or specific items like 'iPhone', 'kurta', 'rice'."
+            message: `Sorry, I couldn't find products matching "${query}". Try searching for:\n• Electronics: "phone", "laptop", "fan"\n• Fashion: "kurta", "jeans", "shoes"\n• Groceries: "rice", "dal", "oil"\n• Beauty: "shampoo", "cream", "kajal"`
           };
         }
         
-        let message = `Found ${products.length} products matching "${query}". `;
+        let message = `Great! I found ${products.length} products matching "${query}". `;
         
         // Add voice confirmation for voice queries
         if (this.isVoiceQuery(query)) {
-          message = `Great! I found ${products.length} products for you. ` + message;
+          message = `Perfect! I found ${products.length} products for you. ` + message;
         }
         
-        message += "You can add any item to your cart by saying 'add [product name] to cart'.";
-        
-        // Check if we should navigate to a specific page
-        if (specificProductMatch) {
-          return {
-            products,
-            message,
-            shouldNavigate: true,
-            navigationPath: `/search?q=${encodeURIComponent(query)}`
-          };
-        }
+        message += "You can add any item to your cart or compare products.";
         
         return {
           products,
-          message
+          message,
+          shouldNavigate: true,
+          navigationPath: `/search?q=${encodeURIComponent(query)}`
         };
       } catch (error) {
+        console.error('Search error:', error);
         return {
           products: [],
-          message: "I'm having trouble searching right now. Please try again in a moment."
+          message: "I'm having trouble searching right now. Please try again with a simpler search term like 'phone' or 'kurta'."
         };
       }
     } else {
       return {
         products: [],
-        message: "I'm here to help with shopping-related queries only. Try searching for products, checking your cart, or asking about orders!"
+        message: "I'm here to help with shopping! Try searching for products like 'iPhone', 'kurta', 'rice', or ask me to 'show Electronics category'."
       };
     }
   }
 
-  // Detect if the query is for a specific product that should navigate
-  private detectSpecificProduct(query: string): boolean {
-    const specificProductKeywords = [
-      'iphone', 'samsung galaxy', 'oneplus', 'redmi', 'mi', 'realme',
-      'nike', 'adidas', 'levis', 'kurta', 'saree', 'jeans',
-      'rice', 'dal', 'oil', 'masala', 'tea', 'coffee',
-      'shampoo', 'face wash', 'lipstick', 'kajal'
+  // Try alternative search terms if main search fails
+  private async tryAlternativeSearch(query: string): Promise<Product[]> {
+    const alternatives = [
+      // Phone alternatives
+      ['iphone', 'phone', 'mobile', 'smartphone'],
+      ['samsung', 'phone', 'mobile'],
+      ['oneplus', 'phone', 'mobile'],
+      ['redmi', 'phone', 'mobile', 'mi'],
+      
+      // Fashion alternatives
+      ['kurta', 'ethnic', 'traditional'],
+      ['jeans', 'pants', 'denim'],
+      ['saree', 'ethnic', 'traditional'],
+      ['shoes', 'footwear'],
+      
+      // Groceries alternatives
+      ['rice', 'basmati', 'grain'],
+      ['dal', 'lentil', 'pulse'],
+      ['oil', 'cooking'],
+      ['masala', 'spice'],
+      
+      // Electronics alternatives
+      ['laptop', 'computer'],
+      ['fan', 'cooling'],
+      ['cooler', 'cooling'],
+      ['inverter', 'power'],
     ];
-    
-    return specificProductKeywords.some(keyword => query.includes(keyword));
+
+    for (const altGroup of alternatives) {
+      if (altGroup.some(alt => query.includes(alt))) {
+        for (const alternative of altGroup) {
+          if (alternative !== query) {
+            const results = await searchProducts(alternative);
+            if (results.length > 0) {
+              return results;
+            }
+          }
+        }
+      }
+    }
+
+    return [];
   }
 
-  // Detect if query came from voice input (basic heuristic)
+  // Detect if query came from voice input
   private isVoiceQuery(query: string): boolean {
-    // Voice queries often have more natural language patterns
     const voicePatterns = [
       'i need', 'i want', 'show me', 'find me', 'looking for',
       'under', 'below', 'above', 'around', 'approximately'
@@ -175,7 +213,6 @@ class ShopTalkService {
       this.state.currentStep = 'order_confirmed';
       const orderTotal = this.state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
-      // Simulate backend API call
       console.log('API Call: POST /api/orders', {
         items: this.state.cart,
         total: orderTotal,
@@ -186,7 +223,6 @@ class ShopTalkService {
         this.state.cart.map(item => `• ${item.name} x ${item.quantity}`).join('\n')
       }\n\n💰 Total Paid: ₹${orderTotal.toLocaleString()}\n🚚 Estimated delivery: 2-3 hours\n\nYour order has been saved in our system.`;
 
-      // Clear cart after successful order
       this.state.cart = [];
       this.state.currentStep = 'browsing';
 
@@ -222,7 +258,7 @@ class ShopTalkService {
     ];
 
     return shoppingKeywords.some(keyword => query.includes(keyword)) || 
-           query.length > 2; // Allow general searches
+           query.length > 2;
   }
 
   // Process user message and determine intent

@@ -1,4 +1,3 @@
-
 import { Product } from '@/types/product';
 
 const API_BASE_URL = 'https://dummyjson.com';
@@ -11,57 +10,297 @@ const locations = [
   'Anna Nagar, Chennai'
 ];
 
-// Enhanced Indian market products
+// Enhanced Indian market products with diverse images
 const indianMarketProducts = {
   Electronics: [
-    { name: 'Bajaj Ceiling Fan 1200mm', price: 2499, rating: 4.3, description: 'High speed ceiling fan with 3 years warranty' },
-    { name: 'Luminous Inverter 850VA', price: 4999, rating: 4.5, description: 'Pure sine wave inverter for home backup' },
-    { name: 'Symphony Air Cooler 45L', price: 7999, rating: 4.2, description: 'Desert air cooler with honeycomb pads' },
-    { name: 'OnePlus Nord CE 3 Lite', price: 19999, rating: 4.4, description: '8GB RAM, 128GB Storage, 108MP Camera' },
-    { name: 'Mi Smart Band 7', price: 2799, rating: 4.3, description: 'Fitness tracker with 12-day battery life' },
-    { name: 'Prestige Induction Cooktop', price: 2899, rating: 4.1, description: '2000W induction cooktop with preset menu' },
-    { name: 'LG Microwave Oven 20L', price: 6999, rating: 4.2, description: 'Solo microwave with 6 power levels' },
-    { name: 'Crompton Water Heater 15L', price: 8999, rating: 4.0, description: 'Storage water heater with 5-star rating' }
+    { 
+      name: 'Bajaj Ceiling Fan 1200mm', 
+      price: 2499, 
+      rating: 4.3, 
+      description: 'High speed ceiling fan with 3 years warranty',
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Luminous Inverter 850VA', 
+      price: 4999, 
+      rating: 4.5, 
+      description: 'Pure sine wave inverter for home backup',
+      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Symphony Air Cooler 45L', 
+      price: 7999, 
+      rating: 4.2, 
+      description: 'Desert air cooler with honeycomb pads',
+      image: 'https://images.unsplash.com/photo-1606152421802-db97b6c7bc85?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'OnePlus Nord CE 3 Lite', 
+      price: 19999, 
+      rating: 4.4, 
+      description: '8GB RAM, 128GB Storage, 108MP Camera',
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Mi Smart Band 7', 
+      price: 2799, 
+      rating: 4.3, 
+      description: 'Fitness tracker with 12-day battery life',
+      image: 'https://images.unsplash.com/photo-1557935728-e6d1eaabe558?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Prestige Induction Cooktop', 
+      price: 2899, 
+      rating: 4.1, 
+      description: '2000W induction cooktop with preset menu',
+      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'LG Microwave Oven 20L', 
+      price: 6999, 
+      rating: 4.2, 
+      description: 'Solo microwave with 6 power levels',
+      image: 'https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Crompton Water Heater 15L', 
+      price: 8999, 
+      rating: 4.0, 
+      description: 'Storage water heater with 5-star rating',
+      image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop'
+    }
   ],
   Fashion: [
-    { name: 'Ethnic Cotton Kurta Set', price: 1299, rating: 4.3, description: 'Traditional kurta with matching bottom' },
-    { name: 'Levi\'s Mens Jeans', price: 2999, rating: 4.5, description: 'Regular fit denim jeans' },
-    { name: 'Saree Silk Kanchipuram', price: 4999, rating: 4.6, description: 'Traditional silk saree with zari work' },
-    { name: 'Nike Running Shoes', price: 4999, rating: 4.4, description: 'Lightweight running shoes for men' },
-    { name: 'Ethnic Palazzo Set', price: 899, rating: 4.2, description: 'Comfortable palazzo with kurti' },
-    { name: 'Formal Shirt Cotton', price: 1499, rating: 4.1, description: 'Full sleeve formal shirt for office wear' },
-    { name: 'Traditional Lehenga Choli', price: 3999, rating: 4.5, description: 'Designer lehenga for festive occasions' },
-    { name: 'Casual T-Shirt Pack of 3', price: 999, rating: 4.0, description: 'Cotton t-shirts in assorted colors' }
+    { 
+      name: 'Ethnic Cotton Kurta Set', 
+      price: 1299, 
+      rating: 4.3, 
+      description: 'Traditional kurta with matching bottom',
+      image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e1?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Levi\'s Mens Jeans', 
+      price: 2999, 
+      rating: 4.5, 
+      description: 'Regular fit denim jeans',
+      image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Saree Silk Kanchipuram', 
+      price: 4999, 
+      rating: 4.6, 
+      description: 'Traditional silk saree with zari work',
+      image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Nike Running Shoes', 
+      price: 4999, 
+      rating: 4.4, 
+      description: 'Lightweight running shoes for men',
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Ethnic Palazzo Set', 
+      price: 899, 
+      rating: 4.2, 
+      description: 'Comfortable palazzo with kurti',
+      image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Formal Shirt Cotton', 
+      price: 1499, 
+      rating: 4.1, 
+      description: 'Full sleeve formal shirt for office wear',
+      image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Traditional Lehenga Choli', 
+      price: 3999, 
+      rating: 4.5, 
+      description: 'Designer lehenga for festive occasions',
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Casual T-Shirt Pack of 3', 
+      price: 999, 
+      rating: 4.0, 
+      description: 'Cotton t-shirts in assorted colors',
+      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop'
+    }
   ],
   Groceries: [
-    { name: 'Toor Dal 1kg', price: 149, rating: 4.4, description: 'Premium quality arhar dal' },
-    { name: 'Basmati Rice 5kg', price: 599, rating: 4.5, description: 'Long grain basmati rice' },
-    { name: 'MDH Garam Masala 100g', price: 89, rating: 4.6, description: 'Authentic Indian spice blend' },
-    { name: 'Amul Butter 500g', price: 285, rating: 4.7, description: 'Fresh unsalted butter' },
-    { name: 'Britannia Good Day Cookies', price: 45, rating: 4.2, description: 'Cashew and almond cookies' },
-    { name: 'Maggi 2-Minute Noodles Pack', price: 144, rating: 4.3, description: 'Pack of 12 masala noodles' },
-    { name: 'Fortune Sunflower Oil 1L', price: 165, rating: 4.1, description: 'Refined sunflower cooking oil' },
-    { name: 'Tata Tea Premium 1kg', price: 449, rating: 4.4, description: 'Strong and aromatic tea leaves' }
+    { 
+      name: 'Toor Dal 1kg', 
+      price: 149, 
+      rating: 4.4, 
+      description: 'Premium quality arhar dal',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e26c?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Basmati Rice 5kg', 
+      price: 599, 
+      rating: 4.5, 
+      description: 'Long grain basmati rice',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e26c?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'MDH Garam Masala 100g', 
+      price: 89, 
+      rating: 4.6, 
+      description: 'Authentic Indian spice blend',
+      image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Amul Butter 500g', 
+      price: 285, 
+      rating: 4.7, 
+      description: 'Fresh unsalted butter',
+      image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Britannia Good Day Cookies', 
+      price: 45, 
+      rating: 4.2, 
+      description: 'Cashew and almond cookies',
+      image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Maggi 2-Minute Noodles Pack', 
+      price: 144, 
+      rating: 4.3, 
+      description: 'Pack of 12 masala noodles',
+      image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Fortune Sunflower Oil 1L', 
+      price: 165, 
+      rating: 4.1, 
+      description: 'Refined sunflower cooking oil',
+      image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Tata Tea Premium 1kg', 
+      price: 449, 
+      rating: 4.4, 
+      description: 'Strong and aromatic tea leaves',
+      image: 'https://images.unsplash.com/photo-1594631661960-27d9eedd41b5?w=400&h=400&fit=crop'
+    }
   ],
   Beauty: [
-    { name: 'Lakme Absolute Foundation', price: 1299, rating: 4.3, description: 'Full coverage liquid foundation' },
-    { name: 'Himalaya Neem Face Wash', price: 149, rating: 4.5, description: 'Purifying neem face wash' },
-    { name: 'L\'Oreal Paris Shampoo', price: 399, rating: 4.2, description: 'Total repair 5 shampoo 650ml' },
-    { name: 'Mamaearth Vitamin C Serum', price: 599, rating: 4.4, description: 'Natural vitamin C face serum' },
-    { name: 'Maybelline Kajal', price: 199, rating: 4.6, description: 'Colossal kajal 24hr wear' },
-    { name: 'Neutrogena Moisturizer', price: 449, rating: 4.3, description: 'Oil-free moisture gel 50ml' },
-    { name: 'Plum Body Lotion', price: 349, rating: 4.1, description: 'Vanilla vibes body lotion' },
-    { name: 'Forest Essentials Face Pack', price: 899, rating: 4.5, description: 'Ayurvedic ubtan face pack' }
+    { 
+      name: 'Lakme Absolute Foundation', 
+      price: 1299, 
+      rating: 4.3, 
+      description: 'Full coverage liquid foundation',
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Himalaya Neem Face Wash', 
+      price: 149, 
+      rating: 4.5, 
+      description: 'Purifying neem face wash',
+      image: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'L\'Oreal Paris Shampoo', 
+      price: 399, 
+      rating: 4.2, 
+      description: 'Total repair 5 shampoo 650ml',
+      image: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Mamaearth Vitamin C Serum', 
+      price: 599, 
+      rating: 4.4, 
+      description: 'Natural vitamin C face serum',
+      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Maybelline Kajal', 
+      price: 199, 
+      rating: 4.6, 
+      description: 'Colossal kajal 24hr wear',
+      image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Neutrogena Moisturizer', 
+      price: 449, 
+      rating: 4.3, 
+      description: 'Oil-free moisture gel 50ml',
+      image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Plum Body Lotion', 
+      price: 349, 
+      rating: 4.1, 
+      description: 'Vanilla vibes body lotion',
+      image: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Forest Essentials Face Pack', 
+      price: 899, 
+      rating: 4.5, 
+      description: 'Ayurvedic ubtan face pack',
+      image: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&h=400&fit=crop'
+    }
   ],
   Sports: [
-    { name: 'Decathlon Badminton Racket', price: 1499, rating: 4.3, description: 'Lightweight graphite racket' },
-    { name: 'Nike Dri-FIT T-Shirt', price: 1999, rating: 4.5, description: 'Moisture-wicking sports t-shirt' },
-    { name: 'Yonex Shuttlecock Feather', price: 1299, rating: 4.6, description: 'Tournament grade shuttlecocks' },
-    { name: 'Adidas Football Size 5', price: 1899, rating: 4.4, description: 'FIFA approved match football' },
-    { name: 'Cosco Cricket Bat', price: 2499, rating: 4.2, description: 'English willow cricket bat' },
-    { name: 'Nivia Running Shoes', price: 2999, rating: 4.1, description: 'Lightweight running shoes' },
-    { name: 'Gym Protein Shaker', price: 299, rating: 4.0, description: 'BPA-free protein shaker bottle' },
-    { name: 'Yoga Mat Anti-Slip', price: 799, rating: 4.3, description: 'Premium NBR yoga mat 6mm' }
+    { 
+      name: 'Decathlon Badminton Racket', 
+      price: 1499, 
+      rating: 4.3, 
+      description: 'Lightweight graphite racket',
+      image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Nike Dri-FIT T-Shirt', 
+      price: 1999, 
+      rating: 4.5, 
+      description: 'Moisture-wicking sports t-shirt',
+      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Yonex Shuttlecock Feather', 
+      price: 1299, 
+      rating: 4.6, 
+      description: 'Tournament grade shuttlecocks',
+      image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Adidas Football Size 5', 
+      price: 1899, 
+      rating: 4.4, 
+      description: 'FIFA approved match football',
+      image: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Cosco Cricket Bat', 
+      price: 2499, 
+      rating: 4.2, 
+      description: 'English willow cricket bat',
+      image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Nivia Running Shoes', 
+      price: 2999, 
+      rating: 4.1, 
+      description: 'Lightweight running shoes',
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Gym Protein Shaker', 
+      price: 299, 
+      rating: 4.0, 
+      description: 'BPA-free protein shaker bottle',
+      image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=400&h=400&fit=crop'
+    },
+    { 
+      name: 'Yoga Mat Anti-Slip', 
+      price: 799, 
+      rating: 4.3, 
+      description: 'Premium NBR yoga mat 6mm',
+      image: 'https://images.unsplash.com/photo-1506629905607-4b9f3c3a0f1d?w=400&h=400&fit=crop'
+    }
   ]
 };
 
@@ -81,12 +320,12 @@ const transformProduct = (apiProduct: any): Product => {
 };
 
 // Transform local product data to Product type
-const transformLocalProduct = (product: any, categoryImage: string): Product => {
+const transformLocalProduct = (product: any): Product => {
   return {
     id: Math.random().toString(36).substr(2, 9),
     name: product.name,
     price: product.price,
-    image: categoryImage,
+    image: product.image,
     inStock: true,
     storeAvailability: locations[Math.floor(Math.random() * locations.length)],
     onlineAvailability: 'Delivery in 2-3 hours',
@@ -127,22 +366,13 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
 const searchLocalProducts = (query: string): Product[] => {
   const searchQuery = query.toLowerCase();
   const results: Product[] = [];
-  
-  // Category images for local products
-  const categoryImages = {
-    Electronics: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=400&fit=crop',
-    Fashion: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop',
-    Groceries: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop',
-    Beauty: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-    Sports: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop'
-  };
 
   // Search through all categories
   Object.entries(indianMarketProducts).forEach(([category, products]) => {
     products.forEach(product => {
       if (product.name.toLowerCase().includes(searchQuery) || 
           product.description.toLowerCase().includes(searchQuery)) {
-        results.push(transformLocalProduct(product, categoryImages[category as keyof typeof categoryImages]));
+        results.push(transformLocalProduct(product));
       }
     });
   });
@@ -156,17 +386,8 @@ export const getProductsByCategory = async (category: string): Promise<Product[]
     const categoryKey = category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     
     if (indianMarketProducts[categoryKey as keyof typeof indianMarketProducts]) {
-      const categoryImage = {
-        'Electronics': 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=400&fit=crop',
-        'Fashion': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop',
-        'Home & Kitchen': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop',
-        'Groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop',
-        'Beauty': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-        'Sports': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop'
-      }[categoryKey] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop';
-
       const localProducts = indianMarketProducts[categoryKey as keyof typeof indianMarketProducts];
-      return localProducts.map(product => transformLocalProduct(product, categoryImage));
+      return localProducts.map(product => transformLocalProduct(product));
     }
 
     // Fallback to API for other categories

@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 
 const HeroBanner = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
   const banners = [
     {
@@ -15,7 +16,8 @@ const HeroBanner = () => {
       description: "Shop the biggest deals of the year",
       image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=400&fit=crop",
       cta: "Shop Now",
-      bgColor: "bg-gradient-to-r from-orange-500 to-red-600"
+      bgColor: "bg-gradient-to-r from-orange-500 to-red-600",
+      action: () => navigate('/category/electronics')
     },
     {
       id: 2,
@@ -24,7 +26,14 @@ const HeroBanner = () => {
       description: "Chat or speak to find products instantly",
       image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop",
       cta: "Try AI Assistant",
-      bgColor: "bg-gradient-to-r from-blue-600 to-indigo-700"
+      bgColor: "bg-gradient-to-r from-blue-600 to-indigo-700",
+      action: () => {
+        // Scroll to chat interface
+        const chatElement = document.querySelector('[data-chat-interface]');
+        if (chatElement) {
+          chatElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     },
     {
       id: 3,
@@ -33,7 +42,8 @@ const HeroBanner = () => {
       description: "Get fresh vegetables and fruits delivered",
       image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=400&fit=crop",
       cta: "Order Fresh",
-      bgColor: "bg-gradient-to-r from-green-500 to-emerald-600"
+      bgColor: "bg-gradient-to-r from-green-500 to-emerald-600",
+      action: () => navigate('/category/groceries')
     }
   ];
 
@@ -52,15 +62,22 @@ const HeroBanner = () => {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
+  const handleBannerClick = (banner: typeof banners[0]) => {
+    if (banner.action) {
+      banner.action();
+    }
+  };
+
   return (
     <div className="relative h-96 overflow-hidden">
       {banners.map((banner, index) => (
         <div
           key={banner.id}
-          className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
+          className={`absolute inset-0 transition-transform duration-500 ease-in-out cursor-pointer ${
             index === currentSlide ? 'translate-x-0' : 
             index < currentSlide ? '-translate-x-full' : 'translate-x-full'
           }`}
+          onClick={() => handleBannerClick(banner)}
         >
           <div className={`${banner.bgColor} h-full flex items-center`}>
             <div className="container mx-auto px-4">
@@ -74,6 +91,10 @@ const HeroBanner = () => {
                   <Button 
                     size="lg" 
                     className="bg-white text-gray-900 hover:bg-gray-100 font-semibold"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBannerClick(banner);
+                    }}
                   >
                     {banner.cta}
                   </Button>
@@ -95,26 +116,35 @@ const HeroBanner = () => {
       <Button
         variant="outline"
         size="sm"
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-        onClick={prevSlide}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+          prevSlide();
+        }}
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
       <Button
         variant="outline"
         size="sm"
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-        onClick={nextSlide}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+          nextSlide();
+        }}
       >
         <ChevronRight className="w-4 h-4" />
       </Button>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
         {banners.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentSlide(index)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentSlide(index);
+            }}
             className={`w-3 h-3 rounded-full transition-colors ${
               index === currentSlide ? 'bg-white' : 'bg-white/50'
             }`}

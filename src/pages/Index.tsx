@@ -15,7 +15,6 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     console.log('Searching for:', query);
-    // Navigate to a search results page with the query
     const searchQuery = encodeURIComponent(query);
     navigate(`/search?q=${searchQuery}`);
   };
@@ -24,10 +23,8 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {/* Hero Banner Section */}
       <HeroBanner />
       
-      {/* Quick Actions Bar */}
       <div className="bg-white border-b border-gray-200 py-3">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -48,8 +45,7 @@ const Index = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-7xl mx-auto">
           
-          {/* Shopping Assistant Section */}
-          <Card className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <Card className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50" data-chat-interface>
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Your AI Shopping Assistant
@@ -69,13 +65,8 @@ const Index = () => {
             </div>
           </Card>
 
-          {/* Categories Section */}
           <CategoryGrid />
-
-          {/* Deals Section */}
           <DealsSection />
-
-          {/* AI Features */}
           <AIFeatures />
         </div>
       </div>

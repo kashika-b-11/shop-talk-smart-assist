@@ -4,7 +4,7 @@ import { MapPin, Search, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Loader } from '@googlemaps/js-api-loader';
+import { useToast } from '@/hooks/use-toast';
 
 interface Store {
   id: string;
@@ -18,7 +18,8 @@ const LocationEditor = () => {
   const [currentLocation, setCurrentLocation] = useState('MG Road, Bangalore, Karnataka 560001, India');
   const [searchLocation, setSearchLocation] = useState('');
   const [nearbyStores, setNearbyStores] = useState<Store[]>([]);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const { toast } = useToast();
 
   const mockStores: Store[] = [
     {
@@ -53,42 +54,97 @@ const LocationEditor = () => {
 
   useEffect(() => {
     setNearbyStores(mockStores);
-    initializeGoogleMaps();
   }, []);
 
-  const initializeGoogleMaps = async () => {
-    try {
-      // Note: In a real app, you would use an actual Google Maps API key
-      // For now, we'll simulate the map loading
-      setTimeout(() => {
-        setMapLoaded(true);
-      }, 1000);
-    } catch (error) {
-      console.error('Google Maps API not available:', error);
-      setMapLoaded(true); // Still show the interface
-    }
-  };
-
-  const handleLocationSearch = () => {
+  const handleLocationSearch = async () => {
     if (searchLocation.trim()) {
       setCurrentLocation(searchLocation);
+      toast({
+        title: "Location Updated",
+        description: `Location changed to: ${searchLocation}`,
+      });
       console.log('Searching for:', searchLocation);
     }
   };
 
   const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCurrentLocation(`Current Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-          console.log('Current position:', { latitude, longitude });
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
+    if (!navigator.geolocation) {
+      toast({
+        title: "Location Error",
+        description: "Geolocation is not supported by this browser.",
+        variant: "destructive"
+      });
+      return;
     }
+
+    setIsLoadingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          // Use reverse geocoding to get address from coordinates
+          const response = await fetch(
+            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=demo_key&limit=1`
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.results && data.results.length > 0) {
+              const address = data.results[0].formatted;
+              setCurrentLocation(address);
+              toast({
+                title: "Location Found",
+                description: "Your current location has been set successfully.",
+              });
+            } else {
+              setCurrentLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            }
+          } else {
+            setCurrentLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          }
+        } catch (error) {
+          console.error('Geocoding error:', error);
+          setCurrentLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          toast({
+            title: "Location Set",
+            description: "Location coordinates have been set.",
+          });
+        }
+        
+        setIsLoadingLocation(false);
+        console.log('Current position:', { latitude, longitude });
+      },
+      (error) => {
+        setIsLoadingLocation(false);
+        let errorMessage = "Unable to retrieve your location.";
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied by user.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+        
+        toast({
+          title: "Location Error",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        console.error('Error getting location:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
   };
 
   return (
@@ -104,10 +160,11 @@ const LocationEditor = () => {
               variant="outline"
               size="sm"
               onClick={getCurrentLocation}
+              disabled={isLoadingLocation}
               className="flex items-center space-x-2"
             >
               <Navigation size={16} />
-              <span>Use Current</span>
+              <span>{isLoadingLocation ? 'Loading...' : 'Use Current'}</span>
             </Button>
           </div>
         </Card>
@@ -129,27 +186,6 @@ const LocationEditor = () => {
         </div>
       </div>
 
-      {/* Google Maps Integration */}
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Map View</h3>
-        <Card className="p-4">
-          <div className="bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-            {mapLoaded ? (
-              <div className="text-center">
-                <MapPin size={48} className="mx-auto text-[#0071CE] mb-2" />
-                <p className="text-gray-600">Interactive Map Ready</p>
-                <p className="text-sm text-gray-500">Google Maps integration active</p>
-              </div>
-            ) : (
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0071CE] mx-auto mb-2"></div>
-                <p className="text-gray-600">Loading Google Maps...</p>
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
-
       {/* Nearby Stores */}
       <div>
         <h3 className="text-lg font-semibold mb-3">Nearby Walmart Stores</h3>
@@ -165,7 +201,17 @@ const LocationEditor = () => {
                 <div className="text-right">
                   <span className="text-sm font-medium text-green-600">{store.distance}</span>
                   <div className="mt-2">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        setCurrentLocation(store.address);
+                        toast({
+                          title: "Store Selected",
+                          description: `Selected ${store.name}`,
+                        });
+                      }}
+                    >
                       Select Store
                     </Button>
                   </div>
