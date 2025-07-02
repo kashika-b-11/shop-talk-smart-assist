@@ -2,6 +2,7 @@
 import { MapPin, Edit2, Home } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from '@/contexts/LocationContext';
 import Cart from './Cart';
 import AuthDialog from './AuthDialog';
 import LocationEditor from './LocationEditor';
@@ -11,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 const Header = () => {
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const { currentLocation } = useLocation();
 
   const handleLogoClick = () => {
     navigate('/');
@@ -48,7 +50,7 @@ const Header = () => {
               <DialogTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 text-sm hover:bg-blue-600">
                   <MapPin size={16} />
-                  <span className="hidden sm:inline">MG Road, Bangalore, Karnataka 560001, India</span>
+                  <span className="hidden sm:inline max-w-48 truncate">{currentLocation}</span>
                   <Edit2 size={14} className="opacity-70" />
                 </Button>
               </DialogTrigger>

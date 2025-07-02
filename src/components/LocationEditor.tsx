@@ -4,7 +4,7 @@ import { MapPin, Search, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useLocation } from '@/contexts/LocationContext';
 
 interface Store {
   id: string;
@@ -15,11 +15,15 @@ interface Store {
 }
 
 const LocationEditor = () => {
-  const [currentLocation, setCurrentLocation] = useState('MG Road, Bangalore, Karnataka 560001, India');
   const [searchLocation, setSearchLocation] = useState('');
   const [nearbyStores, setNearbyStores] = useState<Store[]>([]);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const { toast } = useToast();
+  const { 
+    currentLocation, 
+    isLoadingLocation, 
+    getCurrentLocation, 
+    searchLocation: searchLocationContext,
+    setCurrentLocation 
+  } = useLocation();
 
   const mockStores: Store[] = [
     {
@@ -58,109 +62,17 @@ const LocationEditor = () => {
 
   const handleLocationSearch = async () => {
     if (searchLocation.trim()) {
-      setCurrentLocation(searchLocation);
-      toast({
-        title: "Location Updated",
-        description: `Location changed to: ${searchLocation}`,
-      });
-      console.log('Searching for:', searchLocation);
+      await searchLocationContext(searchLocation);
+      setSearchLocation('');
     }
   };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast({
-        title: "Location Error",
-        description: "Geolocation is not supported by this browser.",
-        variant: "destructive"
-      });
-      return;
+  const handleUseCurrentLocation = async () => {
+    try {
+      await getCurrentLocation();
+    } catch (error) {
+      console.error('Failed to get current location:', error);
     }
-
-    setIsLoadingLocation(true);
-    
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        try {
-          // Use a reliable reverse geocoding service
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
-            {
-              headers: {
-                'User-Agent': 'Walmart-Shopping-App'
-              }
-            }
-          );
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.display_name) {
-              setCurrentLocation(data.display_name);
-              toast({
-                title: "Location Found",
-                description: "Your current location has been set successfully.",
-              });
-            } else {
-              // Fallback to coordinates with city format
-              const coordsLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-              setCurrentLocation(coordsLocation);
-              toast({
-                title: "Location Set",
-                description: "Location coordinates have been set.",
-              });
-            }
-          } else {
-            const coordsLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-            setCurrentLocation(coordsLocation);
-            toast({
-              title: "Location Set",
-              description: "Location coordinates have been set.",
-            });
-          }
-        } catch (error) {
-          console.error('Geocoding error:', error);
-          const coordsLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          setCurrentLocation(coordsLocation);
-          toast({
-            title: "Location Set",
-            description: "Location coordinates have been set.",
-          });
-        }
-        
-        setIsLoadingLocation(false);
-        console.log('Current position:', { latitude, longitude });
-      },
-      (error) => {
-        setIsLoadingLocation(false);
-        let errorMessage = "Unable to retrieve your location.";
-        
-        switch (error.code) {
-          case GeolocationPositionError.PERMISSION_DENIED:
-            errorMessage = "Location access denied. Please enable location permissions in your browser.";
-            break;
-          case GeolocationPositionError.POSITION_UNAVAILABLE:
-            errorMessage = "Location information is unavailable.";
-            break;
-          case GeolocationPositionError.TIMEOUT:
-            errorMessage = "Location request timed out. Please try again.";
-            break;
-        }
-        
-        toast({
-          title: "Location Error",
-          description: errorMessage,
-          variant: "destructive"
-        });
-        console.error('Error getting location:', error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 300000
-      }
-    );
   };
 
   return (
@@ -175,7 +87,7 @@ const LocationEditor = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={getCurrentLocation}
+              onClick={handleUseCurrentLocation}
               disabled={isLoadingLocation}
               className="flex items-center space-x-2"
             >
@@ -222,10 +134,6 @@ const LocationEditor = () => {
                       variant="outline"
                       onClick={() => {
                         setCurrentLocation(store.address);
-                        toast({
-                          title: "Store Selected",
-                          description: `Selected ${store.name}`,
-                        });
                       }}
                     >
                       Select Store
