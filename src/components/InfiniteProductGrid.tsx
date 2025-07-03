@@ -4,38 +4,60 @@ import ProductGrid from './ProductGrid';
 import { Loader2 } from 'lucide-react';
 
 interface InfiniteProductGridProps {
-  initialProducts: Product[];
-  onLoadMore: (page: number) => Promise<Product[]>;
+  initialProducts?: Product[];
+  onLoadMore?: (page: number) => Promise<Product[]>;
+  loadMoreProducts?: (page: number, limit: number) => Promise<Product[]>;
   hasMore?: boolean;
   gridLayout?: 'compact' | 'large';
 }
 
 const InfiniteProductGrid = ({ 
-  initialProducts, 
+  initialProducts = [], 
   onLoadMore, 
+  loadMoreProducts,
   hasMore = true,
   gridLayout = 'compact' 
 }: InfiniteProductGridProps) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMoreData, setHasMoreData] = useState(hasMore);
   const observerRef = useRef<IntersectionObserver>();
   const lastProductElementRef = useRef<HTMLDivElement>(null);
 
-  // Reset when initial products change
+  // Load initial products if loadMoreProducts is provided
   useEffect(() => {
-    setProducts(initialProducts);
-    setPage(1);
-    setHasMoreData(hasMore);
-  }, [initialProducts, hasMore]);
+    if (loadMoreProducts && products.length === 0) {
+      setIsInitialLoading(true);
+      loadMoreProducts(1, 8).then((initialProducts) => {
+        setProducts(initialProducts);
+        setIsInitialLoading(false);
+        setPage(1);
+      }).catch(() => {
+        setIsInitialLoading(false);
+      });
+    } else if (initialProducts.length > 0) {
+      setProducts(initialProducts);
+      setPage(1);
+      setHasMoreData(hasMore);
+      setIsInitialLoading(false);
+    }
+  }, [loadMoreProducts, initialProducts, hasMore]);
 
-  const loadMoreProducts = useCallback(async () => {
+  const loadMore = useCallback(async () => {
     if (loading || !hasMoreData) return;
 
     setLoading(true);
     try {
-      const newProducts = await onLoadMore(page + 1);
+      let newProducts: Product[] = [];
+      
+      if (onLoadMore) {
+        newProducts = await onLoadMore(page + 1);
+      } else if (loadMoreProducts) {
+        newProducts = await loadMoreProducts(page + 1, 8);
+      }
+      
       if (newProducts.length === 0) {
         setHasMoreData(false);
       } else {
@@ -48,7 +70,7 @@ const InfiniteProductGrid = ({
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMoreData, page, onLoadMore]);
+  }, [loading, hasMoreData, page, onLoadMore, loadMoreProducts]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
@@ -59,7 +81,7 @@ const InfiniteProductGrid = ({
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMoreData) {
-          loadMoreProducts();
+          loadMore();
         }
       },
       { threshold: 0.1 }
@@ -72,13 +94,13 @@ const InfiniteProductGrid = ({
     return () => {
       if (observerRef.current) observerRef.current.disconnect();
     };
-  }, [loadMoreProducts, hasMoreData, loading]);
+  }, [loadMore, hasMoreData, loading]);
 
   return (
     <div className="space-y-6">
       <ProductGrid 
         products={products} 
-        isLoading={false}
+        isLoading={isInitialLoading}
         gridLayout={gridLayout}
       />
       

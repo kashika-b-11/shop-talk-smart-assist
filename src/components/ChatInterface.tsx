@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { shopTalkService } from '@/services/shoptalkService';
 import { useNavigate } from 'react-router-dom';
+import ProductCards from './ProductCards';
+import { Product } from '@/types/product';
 
 interface ChatMessage {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
-  products?: any[];
+  products?: Product[];
 }
 
 interface ChatInterfaceProps {
@@ -112,22 +114,35 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={message.id} className="space-y-3">
             <div
-              className={`max-w-[85%] p-3 rounded-lg ${
-                message.isUser
-                  ? 'bg-[#0071CE] text-white'
-                  : 'bg-gray-100 text-gray-900'
-              }`}
+              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
-              <p className="text-sm whitespace-pre-line">{message.text}</p>
-              <p className="text-xs opacity-70 mt-1">
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
+              <div
+                className={`max-w-[85%] p-3 rounded-lg ${
+                  message.isUser
+                    ? 'bg-[#0071CE] text-white'
+                    : 'bg-gray-100 text-gray-900'
+                }`}
+              >
+                <p className="text-sm whitespace-pre-line">{message.text}</p>
+                <p className="text-xs opacity-70 mt-1">
+                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
+            
+            {/* Display products if available */}
+            {!message.isUser && message.products && message.products.length > 0 && (
+              <div className="ml-2">
+                <ProductCards products={message.products.slice(0, 6)} layout="list" />
+                {message.products.length > 6 && (
+                  <p className="text-xs text-gray-500 mt-2 ml-2">
+                    Showing first 6 results. Search for more specific terms for better results.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         ))}
         {(isLoading || isProcessing) && (

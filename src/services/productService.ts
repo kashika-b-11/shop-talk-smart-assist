@@ -475,32 +475,37 @@ const searchLocalProducts = (query: string): Product[] => {
   return results;
 };
 
-export const getProductsByCategory = async (category: string): Promise<Product[]> => {
+export const getProductsByCategory = async (category: string, page: number = 1, limit: number = 8): Promise<Product[]> => {
   try {
-    // Check if we have local Indian products for this category
-    const categoryKey = category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    
-    if (indianMarketProducts[categoryKey as keyof typeof indianMarketProducts]) {
-      const localProducts = indianMarketProducts[categoryKey as keyof typeof indianMarketProducts];
-      return localProducts.map(product => transformLocalProduct(product));
-    }
-
-    // Fallback to API for other categories
+    // Map URL category to our category names
     const categoryMap: { [key: string]: string } = {
-      'Electronics': 'smartphones',
-      'Fashion': 'womens-dresses',
-      'Home & Kitchen': 'home-decoration',
-      'Groceries': 'groceries',
-      'Beauty': 'beauty',
-      'Sports': 'sports-accessories',
-      'Books': 'furniture',
-      'Toys': 'furniture'
+      'electronics': 'Electronics',
+      'fashion': 'Fashion', 
+      'groceries': 'Groceries',
+      'beauty': 'Beauty',
+      'sports': 'Sports'
     };
-
-    const apiCategory = categoryMap[categoryKey] || 'smartphones';
-    const response = await fetch(`${API_BASE_URL}/products/category/${apiCategory}`);
-    const data = await response.json();
-    return data.products.map(transformProduct);
+    
+    const mappedCategory = categoryMap[category.toLowerCase()] || 'Electronics';
+    const categoryProducts = indianMarketProducts[mappedCategory] || indianMarketProducts.Electronics;
+    
+    // Calculate pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    // Create additional products if we need more for pagination
+    let allProducts = [...categoryProducts];
+    if (allProducts.length < endIndex) {
+      // Duplicate products with slight variations for infinite scroll demo
+      const duplicates = categoryProducts.map((product, index) => ({
+        ...product,
+        name: `${product.name} - Variant ${Math.floor(startIndex / categoryProducts.length) + 1}`,
+        price: product.price + (index * 10), // Slightly vary price
+      }));
+      allProducts = [...allProducts, ...duplicates, ...duplicates, ...duplicates];
+    }
+    
+    return allProducts.slice(startIndex, endIndex).map(transformLocalProduct);
   } catch (error) {
     console.error('Error fetching category products:', error);
     return [];

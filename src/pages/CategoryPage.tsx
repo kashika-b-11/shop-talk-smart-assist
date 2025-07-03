@@ -2,32 +2,17 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/Header';
-import ProductGrid from '@/components/ProductGrid';
+import InfiniteProductGrid from '@/components/InfiniteProductGrid';
 import { Product } from '@/types/product';
 import { getProductsByCategory } from '@/services/productService';
 
 const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadCategoryProducts = async () => {
-      if (!category) return;
-      
-      setIsLoading(true);
-      try {
-        const categoryProducts = await getProductsByCategory(category);
-        setProducts(categoryProducts);
-      } catch (error) {
-        console.error('Error loading category products:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadCategoryProducts();
-  }, [category]);
+  
+  const loadMoreProducts = async (page: number, limit: number) => {
+    if (!category) return [];
+    return await getProductsByCategory(category, page, limit);
+  };
 
   const categoryDisplayName = category?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Category';
 
@@ -46,10 +31,10 @@ const CategoryPage = () => {
             </p>
           </div>
 
-          <ProductGrid 
-            products={products} 
-            isLoading={isLoading}
+          <InfiniteProductGrid 
+            loadMoreProducts={loadMoreProducts}
             gridLayout="large"
+            key={category}
           />
         </div>
       </div>
