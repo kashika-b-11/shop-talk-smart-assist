@@ -56,7 +56,7 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
                   <span className="text-xs font-medium">{product.rating}</span>
                 </div>
                 <div className="text-lg font-bold text-[#0071CE]">
-                  ₹{product.price.toLocaleString()}
+                  ₹{product.price.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </div>
               </div>
               
@@ -98,7 +98,7 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
                     {product.name}
                   </h3>
                   <div className="text-lg font-bold text-[#0071CE]">
-                    ₹{product.price.toLocaleString()}
+                    ₹{product.price.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </div>
                 </div>
                 

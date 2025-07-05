@@ -19,7 +19,7 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-IN'; // Changed to Indian English for better recognition
+      recognitionRef.current.lang = 'en-IN';
 
       recognitionRef.current.onstart = () => {
         setIsListening(true);
