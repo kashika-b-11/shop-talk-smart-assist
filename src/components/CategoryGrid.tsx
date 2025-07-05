@@ -2,6 +2,10 @@
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 
+import toysImg from '../Assets/category_grid/toys.png';
+import sportsImg from '../Assets/category_grid/sports.png';
+import groceriesImg from '../Assets/category_grid/groceries.png';
+
 const CategoryGrid = () => {
   const navigate = useNavigate();
 
@@ -27,7 +31,7 @@ const CategoryGrid = () => {
     {
       id: 4,
       name: "Groceries",
-      image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop",
+      image: groceriesImg,
       discount: "Fresh & Fast"
     },
     {
@@ -39,7 +43,7 @@ const CategoryGrid = () => {
     {
       id: 6,
       name: "Sports",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop",
+      image: sportsImg,
       discount: "Best Prices"
     },
     {
@@ -51,7 +55,7 @@ const CategoryGrid = () => {
     {
       id: 8,
       name: "Toys",
-      image: "https://images.unsplash.com/photo-1558877385-5b2b0c9b5b95?w=200&h=200&fit=crop",
+      image: toysImg,
       discount: "Fun Deals"
     }
   ];
