@@ -55,7 +55,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       // Handle navigation if needed
       if (result.shouldNavigate && result.navigationPath) {
         navigate(result.navigationPath);
-      } else if (result.type === 'search' && result.products) {
+      } else if (result.type === 'search' && result.products && result.products.length > 0) {
         onSearch(inputValue);
       }
 
@@ -73,7 +73,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
           text: responseText,
           isUser: false,
           timestamp: new Date(),
-          products: result.products
+          products: result.products && result.products.length > 0 ? result.products : undefined
         };
         setMessages(prev => [...prev, assistantMessage]);
         setIsProcessing(false);
@@ -82,7 +82,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       console.error('Error processing message:', error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble processing your request right now. Please try again.",
+        text: "I'm having trouble processing your request right now. Please try again with a different search term.",
         isUser: false,
         timestamp: new Date()
       };
@@ -161,7 +161,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Input
-            placeholder="Try: 'Find Redmi Note 13 under 15k' or 'Show me ethnic kurtas'"
+            placeholder="Try: 'Find Samsung phone under 20k' or 'Show me cotton shirts'"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}

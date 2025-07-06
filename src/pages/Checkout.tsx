@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ArrowLeft, MapPin, CreditCard, Truck, Calendar, QrCode, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import Header from '@/components/Header';
 
 const Checkout = () => {
   const { items, getTotalPrice, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -34,6 +33,19 @@ const Checkout = () => {
     address: 'MG Road, Bangalore, Karnataka 560001',
     pincode: '560001'
   });
+
+  // Redirect to home if not authenticated
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to proceed with checkout",
+        variant: "destructive"
+      });
+      navigate('/');
+      return;
+    }
+  }, [isAuthenticated, navigate, toast]);
 
   const deliveryCharge = deliveryOption === 'delivery' ? 40 : 0;
   const totalAmount = getTotalPrice() + deliveryCharge;
@@ -86,15 +98,16 @@ const Checkout = () => {
     return `upi://pay?pa=walmart@paytm&pn=Walmart&am=${totalAmount}&cu=INR&tn=Order Payment`;
   };
 
-  if (items.length === 0) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-6">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+            <h1 className="text-2xl font-bold mb-4">Please log in to continue</h1>
+            <p className="text-gray-600 mb-6">You need to be logged in to proceed with checkout.</p>
             <Button onClick={() => navigate('/')} className="bg-[#0071CE] hover:bg-blue-700">
-              Continue Shopping
+              Go to Home
             </Button>
           </div>
         </div>

@@ -30,28 +30,23 @@ class ShopTalkService {
       try {
         console.log('Searching for products with query:', query);
         
-        const products = await searchProducts(query);
+        // Try direct search first
+        let products = await searchProducts(query);
+        
+        // If no results, try alternative searches
+        if (products.length === 0) {
+          products = await this.tryBetterSearch(cleanQuery);
+        }
+        
         this.state.currentProducts = products;
         this.state.lastSearchQuery = query;
         
         console.log('Search results:', products.length, 'products found');
         
         if (products.length === 0) {
-          // Try alternative search terms
-          const alternativeResults = await this.tryAlternativeSearch(cleanQuery);
-          if (alternativeResults.length > 0) {
-            this.state.currentProducts = alternativeResults;
-            return {
-              products: alternativeResults,
-              message: `I found ${alternativeResults.length} related products for "${query}". You can add any item to your cart!`,
-              shouldNavigate: true,
-              navigationPath: `/search?q=${encodeURIComponent(query)}`
-            };
-          }
-          
           return {
             products: [],
-            message: `Sorry, I couldn't find products matching "${query}". Try searching for:\n• Electronics: "phone", "laptop", "fan"\n• Fashion: "kurta", "jeans", "shoes"\n• Groceries: "rice", "dal", "oil"\n• Beauty: "shampoo", "cream", "kajal"`
+            message: `Sorry, I couldn't find products matching "${query}". Try searching for:\n• Electronics: "phone", "laptop", "headphones"\n• Fashion: "shirt", "jeans", "shoes"\n• Groceries: "rice", "oil", "snacks"\n• Beauty: "shampoo", "cream", "perfume"`
           };
         }
         
@@ -74,54 +69,44 @@ class ShopTalkService {
         console.error('Search error:', error);
         return {
           products: [],
-          message: "I'm having trouble searching right now. Please try again with a simpler search term like 'phone' or 'kurta'."
+          message: "I'm having trouble searching right now. Please try again with a different search term."
         };
       }
     } else {
       return {
         products: [],
-        message: "I'm here to help with shopping! Try searching for products like 'iPhone', 'kurta', 'rice', or ask me to 'show Electronics category'."
+        message: "I'm here to help with shopping! Try searching for products like 'iPhone', 'shirt', 'rice', or ask me to 'show Electronics category'."
       };
     }
   }
 
-  // Try alternative search terms if main search fails
-  private async tryAlternativeSearch(query: string): Promise<Product[]> {
-    const alternatives = [
-      // Phone alternatives
-      ['iphone', 'phone', 'mobile', 'smartphone'],
-      ['samsung', 'phone', 'mobile'],
-      ['oneplus', 'phone', 'mobile'],
-      ['redmi', 'phone', 'mobile', 'mi'],
-      
-      // Fashion alternatives
-      ['kurta', 'ethnic', 'traditional'],
-      ['jeans', 'pants', 'denim'],
-      ['saree', 'ethnic', 'traditional'],
-      ['shoes', 'footwear'],
-      
-      // Groceries alternatives
-      ['rice', 'basmati', 'grain'],
-      ['dal', 'lentil', 'pulse'],
-      ['oil', 'cooking'],
-      ['masala', 'spice'],
-      
-      // Electronics alternatives
-      ['laptop', 'computer'],
-      ['fan', 'cooling'],
-      ['cooler', 'cooling'],
-      ['inverter', 'power'],
-    ];
+  // Improved search with better matching
+  private async tryBetterSearch(query: string): Promise<Product[]> {
+    // Try searching by individual words
+    const words = query.split(' ').filter(word => word.length > 2);
+    
+    for (const word of words) {
+      const results = await searchProducts(word);
+      if (results.length > 0) {
+        return results;
+      }
+    }
 
-    for (const altGroup of alternatives) {
-      if (altGroup.some(alt => query.includes(alt))) {
-        for (const alternative of altGroup) {
-          if (alternative !== query) {
-            const results = await searchProducts(alternative);
-            if (results.length > 0) {
-              return results;
-            }
-          }
+    // Try category-based search
+    const categoryMappings = {
+      'phone': 'electronics', 'mobile': 'electronics', 'smartphone': 'electronics',
+      'laptop': 'electronics', 'computer': 'electronics',
+      'shirt': 'fashion', 'jeans': 'fashion', 'dress': 'fashion', 'shoes': 'fashion',
+      'kurta': 'fashion', 'saree': 'fashion',
+      'rice': 'groceries', 'oil': 'groceries', 'dal': 'groceries',
+      'shampoo': 'beauty', 'cream': 'beauty', 'perfume': 'beauty'
+    };
+
+    for (const [keyword, category] of Object.entries(categoryMappings)) {
+      if (query.includes(keyword)) {
+        const results = await getProductsByCategory(category);
+        if (results.length > 0) {
+          return results.slice(0, 10); // Limit results
         }
       }
     }
