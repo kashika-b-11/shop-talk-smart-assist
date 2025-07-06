@@ -23,8 +23,9 @@ import superlightImg from '../Assets/deals/proxsuperlight.png';
 
 const allDeals: Product[] = [
   {
-    id: 'deal1',
+    id: 1,
     name: "Samsung Galaxy M35 5G",
+    category: "Electronics",
     price: 18499.00,
     image: SamsungImg,
     rating: 4.2,
@@ -34,8 +35,9 @@ const allDeals: Product[] = [
     description: "Samsung Galaxy M35 5G with 8GB RAM, 128GB Storage"
   },
   {
-    id: 'deal2',
+    id: 2,
     name: "ROG Zephyrus G14 (2025)",
+    category: "Electronics",
     price: 279999.00,
     image: rogImg,
     rating: 4.1,
@@ -45,8 +47,9 @@ const allDeals: Product[] = [
     description: "GA403WR- QS123WS, AMD Ryzen™ AI 9 HX 370 Processor, NVIDIA® GeForce RTX™ 5070 Ti"
   },
   {
-    id: 'deal3',
+    id: 3,
     name: "Sony WH-1000XM6",
+    category: "Electronics",
     price: 29490.00,
     image: sonyImg,
     rating: 4.4,
@@ -56,8 +59,9 @@ const allDeals: Product[] = [
     description: "Sony WH-1000XM6 Wireless Noise Canceling Headphones"
   },
   {
-    id: 'deal4',
+    id: 4,
     name: "Instant Pot Duo",
+    category: "Home & Kitchen",
     price: 4999.00,
     image: potImg,
     rating: 4.3,
@@ -67,8 +71,9 @@ const allDeals: Product[] = [
     description: "Instant Pot Duo 7-in-1 Electric Pressure Cooker"
   },
   {
-    id: 'deal5',
+    id: 5,
     name: "Apple Watch SE",
+    category: "Electronics",
     price: 24999.00,
     image: applewatchImg,
     rating: 4.5,
@@ -78,8 +83,9 @@ const allDeals: Product[] = [
     description: "Apple Watch SE (GPS, 40mm)"
   },
   {
-    id: 'deal6',
+    id: 6,
     name: "JBL Flip 5 Speaker",
+    category: "Electronics",
     price: 7999.00,
     image: flipImg,
     rating: 4.6,
@@ -89,8 +95,9 @@ const allDeals: Product[] = [
     description: "JBL Flip 5 Waterproof Portable Bluetooth Speaker"
   },
   {
-    id: 'deal7',
+    id: 7,
     name: "Amazon Echo Dot (4th Gen)",
+    category: "Electronics",
     price: 3499.00,
     image: echoImg,
     rating: 4.4,
@@ -100,8 +107,9 @@ const allDeals: Product[] = [
     description: "Amazon Echo Dot (4th Gen) Smart Speaker with Alexa"
   },
   {
-    id: 'deal8',
+    id: 8,
     name: "Philips Air Fryer",
+    category: "Home & Kitchen",
     price: 8999.00,
     image: airfryerImg,
     rating: 4.5,
@@ -111,8 +119,9 @@ const allDeals: Product[] = [
     description: "Philips Daily Collection HD9218 Air Fryer"
   },
   {
-    id: 'deal9',
+    id: 9,
     name: "Canon EOS 1500D DSLR",
+    category: "Electronics",
     price: 31999.00,
     image: canondslrImg,
     rating: 4.6,
@@ -122,8 +131,9 @@ const allDeals: Product[] = [
     description: "Canon EOS 1500D 24.1 Digital SLR Camera"
   },
   {
-    id: 'deal10',
+    id: 10,
     name: "FitBit Sense 2",
+    category: "Electronics",
     price: 24999.00,
     image: fitbitImg,
     rating: 4.3,
@@ -133,8 +143,9 @@ const allDeals: Product[] = [
     description: "FitBit Sense 2 with 6+ day battery life, Blood oxygen (SpO2), ECG app"
   },
   {
-    id: 'deal11',
+    id: 11,
     name: "Prestige PIC 20.0",
+    category: "Home & Kitchen",
     price: 2499.00,
     image: prestigetopImg,
     rating: 4.2,
@@ -144,8 +155,9 @@ const allDeals: Product[] = [
     description: "Prestige PIC 20.0 Induction Cooktop 1600 W with Push Buttons (Black)"
   },
   {
-    id: 'deal12',
+    id: 12,
     name: "Logitech PRO X Superlight 2",
+    category: "Electronics",
     price: 14995.00,
     image: superlightImg,
     rating: 4.4,

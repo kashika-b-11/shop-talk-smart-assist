@@ -25,8 +25,9 @@ const ProductComparison = () => {
     // For now, we'll use mock data
     const mockProducts: Product[] = [
       {
-        id: '1',
+        id: 1,
         name: 'OnePlus Nord CE 3 Lite',
+        category: 'Electronics',
         price: 19999,
         image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
         rating: 4.4,
@@ -36,8 +37,9 @@ const ProductComparison = () => {
         description: '8GB RAM, 128GB Storage, 108MP Camera'
       },
       {
-        id: '2',
+        id: 2,
         name: 'Samsung Galaxy M34',
+        category: 'Electronics',
         price: 16999,
         image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
         rating: 4.2,
