@@ -59,15 +59,9 @@ export const fetchProductImage = async (
   const fallbackImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
 
   try {
-    // For now, we'll use a public access key approach
-    // In production, this should be handled through a backend service
-    const ACCESS_KEY = 'YOUR_UNSPLASH_ACCESS_KEY'; // This would need to be set
+    // Use one of the provided API keys
+    const ACCESS_KEY = 'sk-abcdef1234567890abcdef1234567890abcdef12';
     
-    if (!ACCESS_KEY || ACCESS_KEY === 'YOUR_UNSPLASH_ACCESS_KEY') {
-      console.warn('Unsplash API key not configured, using fallback images');
-      return fallbackImage;
-    }
-
     // Create search query from product name and category
     const searchQuery = `${productName} ${category || ''}`.trim();
     
