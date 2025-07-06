@@ -9,7 +9,7 @@ import { getProductsByCategory } from '@/services/productService';
 const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
   
-  const loadMoreProducts = async (page: number, limit: number) => {
+  const loadMoreProducts = async (page: number, limit: number = 8) => {
     if (!category) return [];
     return await getProductsByCategory(category, page, limit);
   };
