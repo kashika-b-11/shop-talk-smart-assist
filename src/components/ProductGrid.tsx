@@ -8,6 +8,7 @@ import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import ProductComparison from './ProductComparison';
+import ProductImage from './ProductImage';
 
 interface ProductGridProps {
   products: Product[];
@@ -159,14 +160,12 @@ const ProductGrid = ({ products, isLoading, onRefresh, gridLayout = 'compact' }:
                 </div>
                 
                 <div className="relative">
-                  <img
-                    src={product.image}
+                  <ProductImage
+                    productName={product.name}
+                    category={product.category}
+                    className="w-full h-48 group-hover:scale-105 transition-transform"
                     alt={product.name}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
-                    }}
+                    fallbackImage={product.image}
                   />
                   {product.inStock && (
                     <Badge className="absolute top-2 left-2 bg-green-100 text-green-800">
@@ -231,7 +230,6 @@ const ProductGrid = ({ products, isLoading, onRefresh, gridLayout = 'compact' }:
     );
   }
 
-  // ... keep existing code (compact layout with comparison features)
   return (
     <>
       <div className="space-y-4">
@@ -288,14 +286,12 @@ const ProductGrid = ({ products, isLoading, onRefresh, gridLayout = 'compact' }:
                     />
                   </div>
                   
-                  <img
-                    src={product.image}
+                  <ProductImage
+                    productName={product.name}
+                    category={product.category}
+                    className="w-24 h-24 rounded-lg"
                     alt={product.name}
-                    className="w-24 h-24 object-cover rounded-lg bg-gray-100"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
-                    }}
+                    fallbackImage={product.image}
                   />
                   
                   <div className="flex-1 space-y-2">

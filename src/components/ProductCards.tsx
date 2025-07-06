@@ -1,4 +1,3 @@
-
 import { Star, MapPin, Truck, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import ProductImage from './ProductImage';
 
 interface ProductCardsProps {
   products: Product[];
@@ -30,14 +30,12 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
         {products.map((product) => (
           <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
             <div className="relative">
-              <img
-                src={product.image}
+              <ProductImage
+                productName={product.name}
+                category={product.category}
+                className="w-full h-32 group-hover:scale-105 transition-transform"
                 alt={product.name}
-                className="w-full h-32 object-cover group-hover:scale-105 transition-transform"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
-                }}
+                fallbackImage={product.image}
               />
               {product.inStock && (
                 <Badge className="absolute top-2 left-2 bg-green-100 text-green-800">
@@ -83,14 +81,12 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
         <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
           <div className="p-3">
             <div className="flex space-x-3">
-              <img
-                src={product.image}
+              <ProductImage
+                productName={product.name}
+                category={product.category}
+                className="w-16 h-16 rounded-lg"
                 alt={product.name}
-                className="w-16 h-16 object-cover rounded-lg bg-gray-100"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
-                }}
+                fallbackImage={product.image}
               />
               
               <div className="flex-1 space-y-1">
