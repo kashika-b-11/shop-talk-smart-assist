@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -59,20 +60,15 @@ export const AIShoppingAssistant = ({ onProductRecommendation, onNavigate }: AIS
     setIsLoading(true);
 
     try {
-      const response = await fetch('/functions/v1/ai-shopping-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user ? (await supabase.auth.getSession()).data.session?.access_token : ''}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('ai-shopping-assistant', {
+        body: {
           message: inputValue,
           context: messages.slice(-5), // Send last 5 messages for context
           userId: user?.id,
-        }),
+        },
       });
 
-      const data = await response.json();
+      if (error) throw error;
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),

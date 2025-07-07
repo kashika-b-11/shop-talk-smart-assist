@@ -75,7 +75,15 @@ export const cartService = {
   async getCartItems(userId: string): Promise<CartItem[]> {
     const { data, error } = await supabase
       .from('cart_items')
-      .select('*')
+      .select(`
+        *,
+        products (
+          id,
+          name,
+          price,
+          image_url
+        )
+      `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
     
@@ -145,7 +153,7 @@ export const orderService = {
     return data;
   },
 
-  subscribeToOrders(userId: string, callback: (order: Order) => void) {
+  subscribeToOrders(userId: string, callback: (payload: any) => void) {
     return supabase
       .channel('orders')
       .on(

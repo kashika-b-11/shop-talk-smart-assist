@@ -12,6 +12,7 @@ import { Product, Review, LightningDeal } from '@/types/product';
 import { productService, reviewService, cartService, lightningDealService } from '@/services/supabaseService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import ProductImage from '@/components/ProductImage';
 
 export const ProductPage = () => {
@@ -82,16 +83,11 @@ export const ProductPage = () => {
     
     setAiLoading(true);
     try {
-      const response = await fetch('/functions/v1/ai-product-comparison', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-        body: JSON.stringify({ product }),
+      const { data, error } = await supabase.functions.invoke('ai-product-comparison', {
+        body: { product },
       });
       
-      const data = await response.json();
+      if (error) throw error;
       setAiComparison(data.comparison);
     } catch (error) {
       console.error('Error getting AI comparison:', error);
@@ -110,16 +106,11 @@ export const ProductPage = () => {
     
     setAiLoading(true);
     try {
-      const response = await fetch('/functions/v1/ai-price-analysis', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-        body: JSON.stringify({ product }),
+      const { data, error } = await supabase.functions.invoke('ai-price-analysis', {
+        body: { product },
       });
       
-      const data = await response.json();
+      if (error) throw error;
       setAiPriceAnalysis(data.analysis);
     } catch (error) {
       console.error('Error getting price analysis:', error);
@@ -138,16 +129,11 @@ export const ProductPage = () => {
     
     setAiLoading(true);
     try {
-      const response = await fetch('/functions/v1/ai-product-qa', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-        body: JSON.stringify({ product, question }),
+      const { data, error } = await supabase.functions.invoke('ai-product-qa', {
+        body: { product, question },
       });
       
-      const data = await response.json();
+      if (error) throw error;
       setAiResponse(data.answer);
     } catch (error) {
       console.error('Error getting AI response:', error);

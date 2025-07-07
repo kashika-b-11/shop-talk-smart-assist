@@ -5,10 +5,14 @@ export interface Product {
   description: string;
   price: number;
   image_url: string;
+  image?: string; // For backward compatibility
   category: string;
   brand: string;
   stock_quantity: number;
   rating: number;
+  inStock?: boolean; // Computed property
+  storeAvailability?: string; // Additional property
+  onlineAvailability?: string; // Additional property
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +37,10 @@ export interface CartItem {
   lightning_deal_id?: number;
   created_at: string;
   updated_at: string;
+  product?: Product; // Join with product data
+  image?: string; // For cart display
+  name?: string; // For cart display
+  price?: number; // For cart display
 }
 
 export interface Order {
