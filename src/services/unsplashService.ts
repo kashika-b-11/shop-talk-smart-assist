@@ -1,17 +1,12 @@
 
-interface UnsplashImage {
-  id: string;
-  urls: {
-    small: string;
-    regular: string;
-    thumb: string;
-  };
-  alt_description: string | null;
+interface GoogleImageResult {
+  link: string;
+  title: string;
+  displayLink: string;
 }
 
-interface UnsplashResponse {
-  results: UnsplashImage[];
-  total: number;
+interface GoogleSearchResponse {
+  items?: GoogleImageResult[];
 }
 
 // Image cache to store fetched URLs
@@ -20,7 +15,7 @@ const imageCache = new Map<string, string>();
 // Get cache from localStorage on initialization
 const initializeCache = () => {
   try {
-    const stored = localStorage.getItem('unsplash_image_cache');
+    const stored = localStorage.getItem('google_image_cache');
     if (stored) {
       const parsedCache = JSON.parse(stored);
       Object.entries(parsedCache).forEach(([key, value]) => {
@@ -36,7 +31,7 @@ const initializeCache = () => {
 const saveCache = () => {
   try {
     const cacheObject = Object.fromEntries(imageCache);
-    localStorage.setItem('unsplash_image_cache', JSON.stringify(cacheObject));
+    localStorage.setItem('google_image_cache', JSON.stringify(cacheObject));
   } catch (error) {
     console.warn('Failed to save image cache to localStorage');
   }
@@ -59,29 +54,28 @@ export const fetchProductImage = async (
   const fallbackImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
 
   try {
-    // Use one of the provided API keys
-    const ACCESS_KEY = 'sk-abcdef1234567890abcdef1234567890abcdef12';
+    // Use Google Custom Search API with the provided key
+    const API_KEY = 'AIzaSyCSi26huzn03fPv_zqf_-xvmOS1AuWUy6k';
+    const CX = '017576662512468239146:omuauf_lfve'; // Default Custom Search Engine ID
     
     // Create search query from product name and category
-    const searchQuery = `${productName} ${category || ''}`.trim();
+    const searchQuery = `${productName} ${category || 'product'}`.trim();
     
     const response = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=squarish`,
+      `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&q=${encodeURIComponent(searchQuery)}&searchType=image&num=1&imgSize=medium&safe=active`,
       {
-        headers: {
-          'Authorization': `Client-ID ${ACCESS_KEY}`,
-        },
+        method: 'GET',
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Unsplash API error: ${response.status}`);
+      throw new Error(`Google Custom Search API error: ${response.status}`);
     }
 
-    const data: UnsplashResponse = await response.json();
+    const data: GoogleSearchResponse = await response.json();
     
-    if (data.results && data.results.length > 0) {
-      const imageUrl = data.results[0].urls.small;
+    if (data.items && data.items.length > 0) {
+      const imageUrl = data.items[0].link;
       
       // Cache the result
       imageCache.set(cacheKey, imageUrl);
@@ -92,7 +86,7 @@ export const fetchProductImage = async (
     
     return fallbackImage;
   } catch (error) {
-    console.error('Error fetching image from Unsplash:', error);
+    console.error('Error fetching image from Google:', error);
     return fallbackImage;
   }
 };
