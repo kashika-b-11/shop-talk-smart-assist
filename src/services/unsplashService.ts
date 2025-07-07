@@ -1,4 +1,5 @@
 
+
 interface GoogleImageResult {
   link: string;
   title: string;
@@ -56,26 +57,40 @@ export const fetchProductImage = async (
   try {
     // Use Google Custom Search API with the provided key
     const API_KEY = 'AIzaSyCSi26huzn03fPv_zqf_-xvmOS1AuWUy6k';
-    const CX = '017576662512468239146:omuauf_lfve'; // Default Custom Search Engine ID
+    const CX = '000888210348716266009:qh5bqebti7a'; // Updated CSE ID for better product results
     
-    // Create search query from product name and category
-    const searchQuery = `${productName} ${category || 'product'}`.trim();
+    // Create more specific search query
+    const searchQuery = `${productName} product official image -recipe -food -vegetable -fruit`.trim();
     
     const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&q=${encodeURIComponent(searchQuery)}&searchType=image&num=1&imgSize=medium&safe=active`,
+      `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&q=${encodeURIComponent(searchQuery)}&searchType=image&num=3&imgSize=medium&safe=active&imgType=photo&imgColorType=color&rights=cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial,cc_nonderived`,
       {
         method: 'GET',
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Google Custom Search API error: ${response.status}`);
+      console.error(`Google Custom Search API error: ${response.status}`);
+      return fallbackImage;
     }
 
     const data: GoogleSearchResponse = await response.json();
     
     if (data.items && data.items.length > 0) {
-      const imageUrl = data.items[0].link;
+      // Try to find the most relevant image from the results
+      let selectedImage = data.items[0];
+      
+      // Look for images from known retailers or product sites
+      const preferredDomains = ['amazon', 'flipkart', 'myntra', 'samsung', 'apple', 'oneplus', 'mi', 'realme', 'hp', 'dell', 'sony', 'jbl'];
+      const relevantImage = data.items.find(item => 
+        preferredDomains.some(domain => item.displayLink.toLowerCase().includes(domain))
+      );
+      
+      if (relevantImage) {
+        selectedImage = relevantImage;
+      }
+      
+      const imageUrl = selectedImage.link;
       
       // Cache the result
       imageCache.set(cacheKey, imageUrl);
@@ -106,3 +121,4 @@ export const getCategoryFallbackImage = (category: string): string => {
 
   return categoryImages[category.toLowerCase()] || categoryImages['groceries'];
 };
+
