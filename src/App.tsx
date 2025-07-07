@@ -1,54 +1,32 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "@/contexts/CartContext";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { LocationProvider } from "@/contexts/LocationContext";
-import Index from "./pages/Index";
-import Profile from "./pages/Profile";
-import Checkout from "./pages/Checkout";
-import OrderConfirmation from "./pages/OrderConfirmation";
-import DeliveryTracking from "./pages/DeliveryTracking";
-import DeliveryOptions from "./pages/DeliveryOptions";
-import StoreLocator from "./pages/StoreLocator";
-import CategoryPage from "./pages/CategoryPage";
-import SearchResults from "./pages/SearchResults";
-import ProductComparison from "./pages/ProductComparison";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/hooks/useAuth';
+import { HomePage } from '@/pages/HomePage';
+import { ProductPage } from '@/pages/ProductPage';
+import { UserProfile } from '@/components/profile/UserProfile';
+import { Toaster } from '@/components/ui/toaster';
+import './App.css';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <LocationProvider>
-          <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/search" element={<SearchResults />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/order-confirmation" element={<OrderConfirmation />} />
-              <Route path="/delivery-tracking" element={<DeliveryTracking />} />
-              <Route path="/delivery-options" element={<DeliveryOptions />} />
-              <Route path="/store-locator" element={<StoreLocator />} />
-              <Route path="/category/:category" element={<CategoryPage />} />
-              <Route path="/compare" element={<ProductComparison />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/profile" element={<UserProfile />} />
             </Routes>
-          </BrowserRouter>
-          </CartProvider>
-        </LocationProvider>
+            <Toaster />
+          </div>
+        </Router>
       </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;
