@@ -10,4 +10,10 @@ export interface Product {
   storeAvailability?: string;
   onlineAvailability?: string;
   description?: string;
+  // Optional fields that may come from Supabase
+  image_url?: string;
+  brand?: string;
+  stock_quantity?: number;
+  created_at?: string;
+  updated_at?: string;
 }
