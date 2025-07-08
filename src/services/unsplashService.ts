@@ -1,124 +1,118 @@
 
-
-interface GoogleImageResult {
-  link: string;
-  title: string;
-  displayLink: string;
+// Enhanced placeholder image service without API dependencies
+interface CategoryImageMap {
+  [key: string]: string[];
 }
 
-interface GoogleSearchResponse {
-  items?: GoogleImageResult[];
-}
-
-// Image cache to store fetched URLs
-const imageCache = new Map<string, string>();
-
-// Get cache from localStorage on initialization
-const initializeCache = () => {
-  try {
-    const stored = localStorage.getItem('google_image_cache');
-    if (stored) {
-      const parsedCache = JSON.parse(stored);
-      Object.entries(parsedCache).forEach(([key, value]) => {
-        imageCache.set(key, value as string);
-      });
-    }
-  } catch (error) {
-    console.warn('Failed to load image cache from localStorage');
-  }
+// Multiple placeholder images for each category
+const categoryImageMap: CategoryImageMap = {
+  'electronics': [
+    'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=400&fit=crop', // Electronics setup
+    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop', // Smartphone
+    'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop', // Laptop
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop', // Headphones
+    'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop', // Speaker
+  ],
+  'fashion': [
+    'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop', // Fashion items
+    'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop', // Shirt
+    'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop', // Jeans
+    'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop', // Shoes
+    'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=400&fit=crop', // Dress
+  ],
+  'groceries': [
+    'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop', // Grocery items
+    'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&h=400&fit=crop', // Rice
+    'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop', // Oil
+    'https://images.unsplash.com/photo-1587049633312-d628ae50a8ae?w=400&h=400&fit=crop', // Honey
+    'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=400&fit=crop', // Tea
+  ],
+  'beauty': [
+    'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop', // Beauty products
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop', // Shampoo
+    'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop', // Lipstick
+    'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop', // Skincare
+  ],
+  'home & kitchen': [
+    'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', // Kitchen items
+    'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=400&fit=crop', // Kettle
+    'https://images.unsplash.com/photo-1585515656892-c6c6cd3b4b8b?w=400&h=400&fit=crop', // Appliances
+    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop', // Home decor
+  ],
+  'sports': [
+    'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop', // Sports equipment
+    'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=400&fit=crop', // Football
+    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop', // Yoga mat
+    'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=400&fit=crop', // Basketball
+  ],
+  'books': [
+    'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=400&fit=crop', // Books
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop', // Study books
+    'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop', // Book stack
+  ],
+  'toys': [
+    'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop', // Toys
+    'https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=400&fit=crop', // Building blocks
+    'https://images.unsplash.com/photo-1572021335469-31706a17aaeb?w=400&h=400&fit=crop', // Toy car
+  ]
 };
 
-// Save cache to localStorage
-const saveCache = () => {
-  try {
-    const cacheObject = Object.fromEntries(imageCache);
-    localStorage.setItem('google_image_cache', JSON.stringify(cacheObject));
-  } catch (error) {
-    console.warn('Failed to save image cache to localStorage');
-  }
+// Product-specific image mapping based on product names
+const productSpecificImages: { [key: string]: string } = {
+  'Samsung Galaxy M35 5G': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  'OnePlus Nord CE3 Lite': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  'Redmi Note 13 Pro': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  'Apple iPhone 13': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+  'HP Pavilion Laptop': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+  'Dell Inspiron 15': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+  'Sony WH-1000XM4 Headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+  'JBL Flip 5 Speaker': 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
+  'Cotton Casual Shirt': 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+  'Denim Blue Jeans': 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop',
+  'Running Shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop',
+  'Basmati Rice 5kg': 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&h=400&fit=crop',
+  'Cooking Oil 1L': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+  'Anti-Aging Face Cream': 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop',
+  'Non-Stick Cookware Set': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop',
+  'Cricket Bat': 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop',
+  'Programming Book': 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=400&fit=crop',
+  'LEGO Building Set': 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
 };
 
-// Initialize cache on module load
-initializeCache();
+// Hash function to create deterministic selection
+const hashString = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+};
 
 export const fetchProductImage = async (
   productName: string,
   category?: string
 ): Promise<string> => {
-  // Check cache first
-  const cacheKey = `${productName}-${category || ''}`.toLowerCase();
-  if (imageCache.has(cacheKey)) {
-    return imageCache.get(cacheKey)!;
+  // Check for product-specific images first
+  if (productSpecificImages[productName]) {
+    return productSpecificImages[productName];
   }
 
-  // Fallback image
-  const fallbackImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop&crop=center';
-
-  try {
-    // Use Google Custom Search API with the provided key
-    const API_KEY = 'AIzaSyCSi26huzn03fPv_zqf_-xvmOS1AuWUy6k';
-    const CX = '000888210348716266009:qh5bqebti7a'; // Updated CSE ID for better product results
-    
-    // Create more specific search query
-    const searchQuery = `${productName} product official image -recipe -food -vegetable -fruit`.trim();
-    
-    const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&q=${encodeURIComponent(searchQuery)}&searchType=image&num=3&imgSize=medium&safe=active&imgType=photo&imgColorType=color&rights=cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial,cc_nonderived`,
-      {
-        method: 'GET',
-      }
-    );
-
-    if (!response.ok) {
-      console.error(`Google Custom Search API error: ${response.status}`);
-      return fallbackImage;
-    }
-
-    const data: GoogleSearchResponse = await response.json();
-    
-    if (data.items && data.items.length > 0) {
-      // Try to find the most relevant image from the results
-      let selectedImage = data.items[0];
-      
-      // Look for images from known retailers or product sites
-      const preferredDomains = ['amazon', 'flipkart', 'myntra', 'samsung', 'apple', 'oneplus', 'mi', 'realme', 'hp', 'dell', 'sony', 'jbl'];
-      const relevantImage = data.items.find(item => 
-        preferredDomains.some(domain => item.displayLink.toLowerCase().includes(domain))
-      );
-      
-      if (relevantImage) {
-        selectedImage = relevantImage;
-      }
-      
-      const imageUrl = selectedImage.link;
-      
-      // Cache the result
-      imageCache.set(cacheKey, imageUrl);
-      saveCache();
-      
-      return imageUrl;
-    }
-    
-    return fallbackImage;
-  } catch (error) {
-    console.error('Error fetching image from Google:', error);
-    return fallbackImage;
-  }
+  // Use category-based selection
+  const categoryKey = category?.toLowerCase() || 'electronics';
+  const categoryImages = categoryImageMap[categoryKey] || categoryImageMap['electronics'];
+  
+  // Use product name hash to deterministically select an image
+  const hash = hashString(productName);
+  const imageIndex = hash % categoryImages.length;
+  
+  return categoryImages[imageIndex];
 };
 
 // Get a category-based fallback image
 export const getCategoryFallbackImage = (category: string): string => {
-  const categoryImages: Record<string, string> = {
-    'electronics': 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=400&fit=crop',
-    'fashion': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop',
-    'groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop',
-    'beauty': 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop',
-    'home & kitchen': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop',
-    'sports': 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop',
-    'books': 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=400&fit=crop',
-    'toys': 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop'
-  };
-
-  return categoryImages[category.toLowerCase()] || categoryImages['groceries'];
+  const categoryKey = category.toLowerCase();
+  const categoryImages = categoryImageMap[categoryKey] || categoryImageMap['electronics'];
+  return categoryImages[0]; // Return first image as fallback
 };
-
