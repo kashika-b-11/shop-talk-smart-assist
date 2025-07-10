@@ -1,3 +1,4 @@
+
 import { Star, MapPin, Truck, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import ProductImage from './ProductImage';
 
 interface ProductCardsProps {
@@ -15,8 +17,10 @@ interface ProductCardsProps {
 const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation(); // Prevent navigation when clicking add to cart
     addToCart(product);
     toast({
       title: "Added to cart",
@@ -24,11 +28,19 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
     });
   };
 
+  const handleProductClick = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
+
   if (layout === 'grid') {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
+          <Card 
+            key={product.id} 
+            className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer"
+            onClick={() => handleProductClick(product.id)}
+          >
             <div className="relative">
               <ProductImage
                 productName={product.name}
@@ -63,7 +75,7 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
                 size="sm"
                 className="w-full bg-[#0071CE] hover:bg-blue-700 text-xs"
                 disabled={!product.inStock}
-                onClick={() => handleAddToCart(product)}
+                onClick={(e) => handleAddToCart(e, product)}
               >
                 <ShoppingCart className="w-3 h-3 mr-1" />
                 Add to Cart
@@ -78,7 +90,11 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
   return (
     <div className="space-y-3">
       {products.map((product) => (
-        <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+        <Card 
+          key={product.id} 
+          className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+          onClick={() => handleProductClick(product.id)}
+        >
           <div className="p-3">
             <div className="flex space-x-3">
               <ProductImage
@@ -113,7 +129,7 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
                   size="sm"
                   className="bg-[#0071CE] hover:bg-blue-700 text-xs"
                   disabled={!product.inStock}
-                  onClick={() => handleAddToCart(product)}
+                  onClick={(e) => handleAddToCart(e, product)}
                 >
                   <ShoppingCart className="w-3 h-3 mr-1" />
                   Add to Cart
