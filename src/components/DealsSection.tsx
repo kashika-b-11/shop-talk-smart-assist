@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { Product } from '@/types/product';
 
 import SamsungImg from '../Assets/deals/samsungM35G.png';
@@ -186,6 +188,7 @@ const allDealDetails = [
 const DealsSection = () => {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [showAll, setShowAll] = useState(false);
 
@@ -200,21 +203,20 @@ const DealsSection = () => {
     });
   };
 
-  const handleProductClick = (product: Product) => {
-    toast({
-      title: product.name,
-      description: (
-        <>
-          {product.description}
-          <br />
-          Price: ₹{Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          <br />
-          Rating: {product.rating}⭐
-          <br />
-          Available at: {product.storeAvailability}
-        </>
-      ),
-    });
+  const handleProductClick = (product: Product, e?: React.MouseEvent) => {
+    // Check if user is holding Ctrl/Cmd key for new tab
+    if (e && (e.ctrlKey || e.metaKey)) {
+      window.open(`/product/${product.id}`, '_blank');
+      return;
+    }
+    navigate(`/product/${product.id}`);
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent, product: Product) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleProductClick(product);
+    }
   };
 
   return (
@@ -228,8 +230,16 @@ const DealsSection = () => {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {deals.map((deal, index) => (
-          <Card key={deal.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="relative" onClick={() => handleProductClick(deal)}>
+          <Card 
+            key={deal.id} 
+            className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-[#0071CE] focus:outline-none"
+            onClick={(e) => handleProductClick(deal, e)}
+            onKeyDown={(e) => handleCardKeyDown(e, deal)}
+            tabIndex={0}
+            role="button"
+            aria-label={`View details for ${deal.name}`}
+          >
+            <div className="relative">
               <img
                 src={deal.image}
                 alt={deal.name}
@@ -241,7 +251,7 @@ const DealsSection = () => {
             </div>
 
             <div className="p-4 space-y-2">
-              <h3 className="font-semibold text-gray-900 line-clamp-2 cursor-pointer" onClick={() => handleProductClick(deal)}>
+              <h3 className="font-semibold text-gray-900 line-clamp-2">
                 {deal.name}
               </h3>
 
@@ -267,11 +277,12 @@ const DealsSection = () => {
               </div>
 
               <Button
-                className="w-full bg-[#0071CE] hover:bg-blue-700"
+                className="w-full bg-[#0071CE] hover:bg-blue-700 transition-colors duration-200"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleAddToCart(deal);
                 }}
+                tabIndex={-1}
               >
                 Add to Cart
               </Button>

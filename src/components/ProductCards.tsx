@@ -12,9 +12,10 @@ import ProductImage from './ProductImage';
 interface ProductCardsProps {
   products: Product[];
   layout?: 'grid' | 'list';
+  openInNewTab?: boolean;
 }
 
-const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
+const ProductCards = ({ products, layout = 'grid', openInNewTab = false }: ProductCardsProps) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -28,8 +29,23 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
     });
   };
 
-  const handleProductClick = (productId: number) => {
+  const handleProductClick = (productId: number, e?: React.MouseEvent) => {
+    if (openInNewTab && e) {
+      // Check if user is holding Ctrl/Cmd key or middle-clicking
+      const shouldOpenInNewTab = e.ctrlKey || e.metaKey || e.button === 1;
+      if (shouldOpenInNewTab) {
+        window.open(`/product/${productId}`, '_blank');
+        return;
+      }
+    }
     navigate(`/product/${productId}`);
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent, productId: number) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleProductClick(productId);
+    }
   };
 
   if (layout === 'grid') {
@@ -38,14 +54,18 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
         {products.map((product) => (
           <Card 
             key={product.id} 
-            className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer"
-            onClick={() => handleProductClick(product.id)}
+            className="overflow-hidden hover:shadow-lg transition-all duration-200 group cursor-pointer focus:ring-2 focus:ring-[#0071CE] focus:outline-none"
+            onClick={(e) => handleProductClick(product.id, e)}
+            onKeyDown={(e) => handleCardKeyDown(e, product.id)}
+            tabIndex={0}
+            role="button"
+            aria-label={`View details for ${product.name}`}
           >
             <div className="relative">
               <ProductImage
                 productName={product.name}
                 category={product.category}
-                className="w-full h-32 group-hover:scale-105 transition-transform"
+                className="w-full h-32 group-hover:scale-105 transition-transform duration-200"
                 alt={product.name}
                 fallbackImage={product.image}
               />
@@ -73,9 +93,10 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
               
               <Button 
                 size="sm"
-                className="w-full bg-[#0071CE] hover:bg-blue-700 text-xs"
+                className="w-full bg-[#0071CE] hover:bg-blue-700 text-xs transition-colors duration-200"
                 disabled={!product.inStock}
                 onClick={(e) => handleAddToCart(e, product)}
+                tabIndex={-1}
               >
                 <ShoppingCart className="w-3 h-3 mr-1" />
                 Add to Cart
@@ -92,8 +113,12 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
       {products.map((product) => (
         <Card 
           key={product.id} 
-          className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-          onClick={() => handleProductClick(product.id)}
+          className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-[#0071CE] focus:outline-none"
+          onClick={(e) => handleProductClick(product.id, e)}
+          onKeyDown={(e) => handleCardKeyDown(e, product.id)}
+          tabIndex={0}
+          role="button"
+          aria-label={`View details for ${product.name}`}
         >
           <div className="p-3">
             <div className="flex space-x-3">
@@ -127,9 +152,10 @@ const ProductCards = ({ products, layout = 'grid' }: ProductCardsProps) => {
                 
                 <Button 
                   size="sm"
-                  className="bg-[#0071CE] hover:bg-blue-700 text-xs"
+                  className="bg-[#0071CE] hover:bg-blue-700 text-xs transition-colors duration-200"
                   disabled={!product.inStock}
                   onClick={(e) => handleAddToCart(e, product)}
+                  tabIndex={-1}
                 >
                   <ShoppingCart className="w-3 h-3 mr-1" />
                   Add to Cart
