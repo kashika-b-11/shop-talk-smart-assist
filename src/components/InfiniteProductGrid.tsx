@@ -1,6 +1,7 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Product } from '@/types/product';
-import ProductGrid from './ProductGrid';
+import ProductCards from './ProductCards';
 import { Loader2 } from 'lucide-react';
 
 interface InfiniteProductGridProps {
@@ -98,10 +99,9 @@ const InfiniteProductGrid = ({
 
   return (
     <div className="space-y-6">
-      <ProductGrid 
+      <ProductCards 
         products={products} 
-        isLoading={isInitialLoading}
-        gridLayout={gridLayout}
+        layout={gridLayout === 'large' ? 'grid' : 'grid'}
       />
       
       {/* Loading indicator */}

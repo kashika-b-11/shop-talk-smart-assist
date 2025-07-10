@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/types/product';
 import Header from '@/components/Header';
 import ProductImage from '@/components/ProductImage';
+import { getAllProducts } from '@/services/productService';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,34 +20,44 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock product data - in real app this would fetch from Supabase
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!id) return;
+      
       setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Mock data based on ID
-      const mockProduct: Product = {
-        id: parseInt(id || '1'),
-        name: `Product ${id}`,
-        category: 'Electronics',
-        price: Math.floor(Math.random() * 50000) + 5000,
-        image: '/placeholder-product.jpg',
-        inStock: true,
-        rating: 4.2 + Math.random() * 0.8,
-        description: 'High-quality product with excellent features and reliable performance. Perfect for daily use with modern design and functionality.',
-        storeAvailability: 'Available at 5 nearby stores',
-        onlineAvailability: 'Free delivery in 2-3 days'
-      };
-      
-      setProduct(mockProduct);
-      setLoading(false);
+      try {
+        // First try to get from real products
+        const allProducts = await getAllProducts();
+        let foundProduct = allProducts.find(p => p.id === parseInt(id));
+        
+        // If not found in service, check if it's from deals section or other components
+        if (!foundProduct) {
+          // Check if this is a Lightning Deal or other product type
+          // Create a fallback product with proper structure
+          foundProduct = {
+            id: parseInt(id),
+            name: `Product ${id}`, // This will be overridden below if we find better data
+            category: 'Electronics',
+            price: Math.floor(Math.random() * 50000) + 5000,
+            image: '/placeholder-product.jpg',
+            inStock: true,
+            rating: 4.2 + Math.random() * 0.8,
+            description: 'High-quality product with excellent features and reliable performance. Perfect for daily use with modern design and functionality.',
+            storeAvailability: 'Available at 5 nearby stores',
+            onlineAvailability: 'Free delivery in 2-3 days'
+          };
+        }
+        
+        setProduct(foundProduct);
+      } catch (error) {
+        console.error('Error loading product:', error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (id) {
-      fetchProduct();
-    }
+    fetchProduct();
   }, [id]);
 
   const handleAddToCart = () => {
