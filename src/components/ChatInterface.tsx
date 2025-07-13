@@ -49,21 +49,17 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
     setIsProcessing(true);
 
     try {
-      // Process message with ShopTalk service
       const result = await shopTalkService.processMessage(inputValue);
       
-      // Handle navigation if needed
       if (result.shouldNavigate && result.navigationPath) {
         navigate(result.navigationPath);
       } else if (result.type === 'search' && result.products && result.products.length > 0) {
         onSearch(inputValue);
       }
 
-      // Add assistant response with voice-like confirmation
       setTimeout(() => {
         let responseText = result.response;
         
-        // Add voice-like confirmation for voice queries
         if (inputValue.toLowerCase().includes('find') || inputValue.toLowerCase().includes('search')) {
           responseText = `🎯 ${responseText}`;
         }
@@ -132,7 +128,6 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
               </div>
             </div>
             
-            {/* Display products if available */}
             {!message.isUser && message.products && message.products.length > 0 && (
               <div className="ml-2">
                 <ProductCards products={message.products.slice(0, 6)} layout="list" />
@@ -161,7 +156,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Input
-            placeholder="Try: 'Find Samsung phone under 20k' or 'Show me cotton shirts'"
+            placeholder="Try: 'Find Redmi Note 13 under 15k' or 'Show my cart'"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}

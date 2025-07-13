@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Volume2, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Check browser support
     const checkSupport = () => {
       const isWebSpeechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
       setIsSupported(isWebSpeechSupported);
@@ -55,7 +53,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
     setIsLoading(true);
     setError(null);
 
-    // Check microphone permission first
     const hasPermission = await checkMicrophonePermission();
     if (!hasPermission) {
       setIsLoading(false);
@@ -66,7 +63,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       
-      // Configure recognition
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-IN';
@@ -79,7 +75,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         console.log('Voice recognition started');
         speakText("I'm listening...");
         
-        // Set a timeout to stop listening after 10 seconds
         timeoutRef.current = setTimeout(() => {
           stopListening();
           setError('Listening timeout. Please try again.');
@@ -95,8 +90,7 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
           console.log('Final transcript:', transcript);
           
           if (transcript.trim()) {
-            // Provide voice confirmation
-            speakText(`Searching for ${transcript}`);
+            speakText(`Processing: ${transcript}`);
             onVoiceInput(transcript);
           } else {
             setError('No speech detected. Please try again.');
@@ -104,7 +98,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
           
           setTranscript('');
           
-          // Clear timeout
           if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
@@ -118,7 +111,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         setIsLoading(false);
         console.log('Voice recognition ended');
         
-        // Clear timeout
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = null;
@@ -131,13 +123,11 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         setTranscript('');
         setIsLoading(false);
         
-        // Clear timeout
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = null;
         }
         
-        // Handle specific errors
         switch (event.error) {
           case 'no-speech':
             setError("I didn't hear anything. Please try again and speak clearly.");
@@ -185,27 +175,26 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
 
   const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
-      // Cancel any ongoing speech
       speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 0.8;
-      utterance.lang = 'en-IN'; // Indian English accent
+      utterance.lang = 'en-IN';
       speechSynthesis.speak(utterance);
     }
   };
 
   const handleDemoSpeak = () => {
     const demoMessages = [
-      "Hi! I'm your Walmart shopping assistant. You can ask me to find products by saying things like:",
-      "Find iPhone 13 under 50000",
-      "Show me ethnic kurtas",
+      "Hi! I'm your Walmart shopping assistant. You can ask me to find products by saying:",
+      "Find Redmi Note 13 under 15000",
+      "Show me cotton kurtas",
       "Search for basmati rice",
-      "Add shampoo to cart",
-      "What's in my cart?",
-      "How can I help you shop today?"
+      "Add iPhone to cart",
+      "Show my cart",
+      "What can I help you find today?"
     ];
     
     const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];

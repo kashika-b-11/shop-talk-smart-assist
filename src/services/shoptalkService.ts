@@ -21,27 +21,37 @@ class ShopTalkService {
     lastSearchQuery: ''
   };
 
-  // Enhanced product search with better keyword matching
+  // Enhanced product search with better keyword matching and filtering
   async searchProducts(query: string): Promise<{ products: Product[], message: string, shouldNavigate?: boolean, navigationPath?: string }> {
     const cleanQuery = query.toLowerCase().trim();
     
-    // Handle shopping-related queries
     if (this.isShoppingQuery(cleanQuery)) {
       try {
         console.log('Searching for products with query:', query);
         
-        // Try direct search first
+        // Extract price range if mentioned
+        const priceMatch = cleanQuery.match(/under\s+(\d+(?:,\d+)*)/);
+        const maxPrice = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : null;
+        
+        // Extract main product category/type
+        const productKeywords = this.extractProductKeywords(cleanQuery);
+        
         let products = await searchProducts(query);
+        
+        // Filter products based on relevance and price
+        if (products.length > 0) {
+          products = this.filterRelevantProducts(products, productKeywords, maxPrice);
+        }
         
         // If no results, try alternative searches
         if (products.length === 0) {
-          products = await this.tryBetterSearch(cleanQuery);
+          products = await this.tryBetterSearch(cleanQuery, maxPrice);
         }
         
         this.state.currentProducts = products;
         this.state.lastSearchQuery = query;
         
-        console.log('Search results:', products.length, 'products found');
+        console.log('Search results:', products.length, 'relevant products found');
         
         if (products.length === 0) {
           return {
@@ -50,14 +60,13 @@ class ShopTalkService {
           };
         }
         
-        let message = `Great! I found ${products.length} products matching "${query}". `;
+        let message = `Great! I found ${products.length} relevant products matching "${query}". `;
         
-        // Add voice confirmation for voice queries
-        if (this.isVoiceQuery(query)) {
-          message = `Perfect! I found ${products.length} products for you. ` + message;
+        if (maxPrice) {
+          message += `All items are under ₹${maxPrice.toLocaleString()}. `;
         }
         
-        message += "You can add any item to your cart or compare products.";
+        message += "You can add any item to your cart or ask me to add specific items.";
         
         return {
           products,
@@ -80,21 +89,51 @@ class ShopTalkService {
     }
   }
 
-  // Improved search with better matching
-  private async tryBetterSearch(query: string): Promise<Product[]> {
-    // Try searching by individual words
-    const words = query.split(' ').filter(word => word.length > 2);
+  // Extract main product keywords from query
+  private extractProductKeywords(query: string): string[] {
+    const productTerms = [
+      // Electronics
+      'iphone', 'phone', 'mobile', 'smartphone', 'samsung', 'oneplus', 'redmi', 'mi', 'realme',
+      'laptop', 'computer', 'macbook', 'dell', 'hp', 'lenovo',
+      'headphones', 'earbuds', 'speaker', 'tv', 'tablet',
+      
+      // Fashion
+      'shirt', 'jeans', 'dress', 'kurta', 'saree', 'shoes', 'sandals', 'jacket',
+      
+      // Groceries
+      'rice', 'dal', 'oil', 'masala', 'tea', 'coffee', 'milk', 'bread', 'flour',
+      
+      // Beauty
+      'shampoo', 'soap', 'cream', 'lotion', 'lipstick', 'kajal', 'perfume'
+    ];
     
-    for (const word of words) {
-      const results = await searchProducts(word);
-      if (results.length > 0) {
-        return results;
-      }
-    }
+    return productTerms.filter(term => query.includes(term));
+  }
 
-    // Try category-based search
+  // Filter products for relevance
+  private filterRelevantProducts(products: Product[], keywords: string[], maxPrice?: number | null): Product[] {
+    let filtered = products;
+    
+    // Filter by price if specified
+    if (maxPrice) {
+      filtered = filtered.filter(product => product.price <= maxPrice);
+    }
+    
+    // Filter by relevance if keywords found
+    if (keywords.length > 0) {
+      filtered = filtered.filter(product => {
+        const productText = `${product.name} ${product.category} ${product.brand || ''}`.toLowerCase();
+        return keywords.some(keyword => productText.includes(keyword));
+      });
+    }
+    
+    return filtered.slice(0, 10); // Limit to 10 most relevant results
+  }
+
+  // Improved search with better matching
+  private async tryBetterSearch(query: string, maxPrice?: number | null): Promise<Product[]> {
     const categoryMappings = {
-      'phone': 'electronics', 'mobile': 'electronics', 'smartphone': 'electronics',
+      'phone': 'electronics', 'mobile': 'electronics', 'smartphone': 'electronics', 'iphone': 'electronics',
       'laptop': 'electronics', 'computer': 'electronics',
       'shirt': 'fashion', 'jeans': 'fashion', 'dress': 'fashion', 'shoes': 'fashion',
       'kurta': 'fashion', 'saree': 'fashion',
@@ -104,9 +143,21 @@ class ShopTalkService {
 
     for (const [keyword, category] of Object.entries(categoryMappings)) {
       if (query.includes(keyword)) {
-        const results = await getProductsByCategory(category);
+        let results = await getProductsByCategory(category);
+        
+        // Filter by price if specified
+        if (maxPrice) {
+          results = results.filter(product => product.price <= maxPrice);
+        }
+        
+        // Filter by keyword relevance
+        results = results.filter(product => {
+          const productText = `${product.name} ${product.brand || ''}`.toLowerCase();
+          return productText.includes(keyword);
+        });
+        
         if (results.length > 0) {
-          return results.slice(0, 10); // Limit results
+          return results.slice(0, 10);
         }
       }
     }
@@ -114,18 +165,14 @@ class ShopTalkService {
     return [];
   }
 
-  // Detect if query came from voice input
-  private isVoiceQuery(query: string): boolean {
-    const voicePatterns = [
-      'i need', 'i want', 'show me', 'find me', 'looking for',
-      'under', 'below', 'above', 'around', 'approximately'
-    ];
-    
-    return voicePatterns.some(pattern => query.toLowerCase().includes(pattern));
-  }
-
   // Enhanced add to cart with better product matching
   addToCart(productName: string): string {
+    console.log('Adding to cart:', productName, 'Available products:', this.state.currentProducts.length);
+    
+    if (this.state.currentProducts.length === 0) {
+      return `Please search for products first, then I can add "${productName}" to your cart.`;
+    }
+
     // Try exact match first
     let product = this.state.currentProducts.find(p => 
       p.name.toLowerCase() === productName.toLowerCase()
@@ -139,43 +186,61 @@ class ShopTalkService {
       );
     }
     
+    // If still no match, try by category for common items
+    if (!product && this.isCommonGroceryItem(productName)) {
+      return this.suggestGroceryOptions(productName);
+    }
+    
     if (!product) {
-      return `I couldn't find "${productName}" in the current search results. Please search for the product first or try a different name.`;
+      return `I couldn't find "${productName}" in the current search results. Please search for the product first or try: "Find ${productName}" to see available options.`;
     }
 
     const existingItem = this.state.cart.find(item => item.id === product.id);
     if (existingItem) {
       existingItem.quantity += 1;
-      return `✅ Added another ${product.name} to your cart. You now have ${existingItem.quantity} items. Would you like to proceed to checkout or continue shopping?`;
+      return `✅ Added another ${product.name} to your cart. You now have ${existingItem.quantity} items. Total cart value: ₹${this.getTotalPrice()}. Say "show cart" to see all items.`;
     } else {
       this.state.cart.push({ ...product, quantity: 1 });
     }
 
     this.state.currentStep = 'cart';
-    return `✅ ${product.name} has been added to your cart for ₹${product.price.toLocaleString()}. Would you like to proceed to payment or continue shopping?`;
+    return `✅ ${product.name} has been added to your cart for ₹${product.price.toLocaleString()}. Total cart value: ₹${this.getTotalPrice()}. Say "show cart" to see all items or continue shopping.`;
   }
 
-  // Get cart contents
+  private isCommonGroceryItem(item: string): boolean {
+    const groceryItems = ['rice', 'dal', 'oil', 'flour', 'sugar', 'tea', 'coffee'];
+    return groceryItems.some(grocery => item.toLowerCase().includes(grocery));
+  }
+
+  private suggestGroceryOptions(item: string): string {
+    return `I can help you find ${item}! Let me search for available options. Try: "Find ${item}" or "Show me ${item} options" to see what's available.`;
+  }
+
+  // Get cart contents with detailed information
   getCart(): { items: CartItem[], total: number, message: string } {
-    const total = this.state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = this.getTotalPrice();
     
     if (this.state.cart.length === 0) {
       return {
         items: [],
         total: 0,
-        message: "Your cart is empty. Browse products and add items to get started!"
+        message: "🛒 Your cart is empty. Browse products and add items to get started! Try searching for items like 'Find iPhone' or 'Show me rice options'."
       };
     }
 
-    const cartSummary = this.state.cart.map(item => 
-      `• ${item.name} (₹${item.price}) x ${item.quantity}`
+    const cartSummary = this.state.cart.map((item, index) => 
+      `${index + 1}. ${item.name} - ₹${item.price.toLocaleString()} x ${item.quantity} = ₹${(item.price * item.quantity).toLocaleString()}`
     ).join('\n');
 
     return {
       items: this.state.cart,
       total,
-      message: `🛒 Cart Contents:\n${cartSummary}\n\n💰 Total: ₹${total.toLocaleString()}\n\nSay "checkout" to proceed to payment.`
+      message: `🛒 Your Cart (${this.state.cart.length} items):\n\n${cartSummary}\n\n💰 Total: ₹${total.toLocaleString()}\n\nSay "checkout" to proceed to payment or "remove [item name]" to remove items.`
     };
+  }
+
+  private getTotalPrice(): number {
+    return this.state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   }
 
   // Handle checkout process
@@ -192,58 +257,16 @@ class ShopTalkService {
     return "Use 'show cart' to view your items, then say 'checkout' to proceed.";
   }
 
-  // Simulate payment
-  processPayment(): string {
-    if (this.state.currentStep === 'payment') {
-      this.state.currentStep = 'order_confirmed';
-      const orderTotal = this.state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      console.log('API Call: POST /api/orders', {
-        items: this.state.cart,
-        total: orderTotal,
-        timestamp: new Date()
-      });
-
-      const orderSummary = `✅ Payment successful! Your order has been confirmed.\n\n📦 Order Details:\n${
-        this.state.cart.map(item => `• ${item.name} x ${item.quantity}`).join('\n')
-      }\n\n💰 Total Paid: ₹${orderTotal.toLocaleString()}\n🚚 Estimated delivery: 2-3 hours\n\nYour order has been saved in our system.`;
-
-      this.state.cart = [];
-      this.state.currentStep = 'browsing';
-
-      return orderSummary;
-    }
-
-    return "Please proceed to checkout first by saying 'checkout'.";
-  }
-
   // Check if query is shopping-related
   private isShoppingQuery(query: string): boolean {
     const shoppingKeywords = [
-      // Action keywords
       'buy', 'purchase', 'search', 'find', 'looking for', 'need', 'want', 'show me',
-      
-      // Categories
       'electronics', 'fashion', 'groceries', 'beauty', 'sports', 'books', 'toys',
-      'home', 'kitchen', 'appliances',
-      
-      // Specific items
-      'phone', 'mobile', 'laptop', 'computer', 'tv', 'fan', 'cooler', 'inverter',
-      'dress', 'shirt', 'jeans', 'kurta', 'saree', 'shoes', 'sandals',
-      'rice', 'dal', 'oil', 'masala', 'tea', 'coffee', 'milk', 'bread',
-      'shampoo', 'soap', 'cream', 'lotion', 'lipstick', 'kajal',
-      
-      // Indian brands
-      'bajaj', 'samsung', 'lg', 'oneplus', 'redmi', 'mi', 'realme',
-      'tata', 'amul', 'britannia', 'maggi', 'himalaya', 'lakme',
-      
-      // Price related
-      'price', 'cost', 'cheap', 'expensive', 'under', 'below', 'above', 'around',
-      'rupees', 'rs', '₹'
+      'phone', 'mobile', 'laptop', 'computer', 'tv', 'dress', 'shirt', 'jeans',
+      'rice', 'dal', 'oil', 'shampoo', 'soap', 'price', 'under', 'below', 'cheap'
     ];
 
-    return shoppingKeywords.some(keyword => query.includes(keyword)) || 
-           query.length > 2;
+    return shoppingKeywords.some(keyword => query.includes(keyword)) || query.length > 2;
   }
 
   // Process user message and determine intent
@@ -262,7 +285,7 @@ class ShopTalkService {
       return { type: 'cart', response: this.addToCart(productName) };
     }
 
-    if (cleanMessage.includes('cart') || cleanMessage.includes('show cart')) {
+    if (cleanMessage.includes('cart') || cleanMessage.includes('show cart') || cleanMessage.includes('my cart')) {
       const cartInfo = this.getCart();
       return { type: 'cart', response: cartInfo.message };
     }
@@ -272,11 +295,7 @@ class ShopTalkService {
       return { type: 'checkout', response: this.processCheckout() };
     }
 
-    if (cleanMessage.includes('payment') || cleanMessage.includes('pay')) {
-      return { type: 'payment', response: this.processPayment() };
-    }
-
-    // Product search with enhanced navigation
+    // Product search
     if (this.isShoppingQuery(cleanMessage)) {
       const searchResult = await this.searchProducts(message);
       return { 
@@ -288,15 +307,14 @@ class ShopTalkService {
       };
     }
 
-    // Default response for non-shopping queries
+    // Default response
     return { 
       type: 'help', 
-      response: "I'm your shopping assistant! Try:\n• 'Find iPhone under 30000'\n• 'Show me kurtas'\n• 'Add rice to cart'\n• 'Show my cart'\n• 'Checkout my order'\n\nI can understand both text and voice commands!"
+      response: "I'm your shopping assistant! Try:\n• 'Find iPhone under 30000'\n• 'Show me rice options'\n• 'Add [product name] to cart'\n• 'Show my cart'\n• 'Checkout my order'\n\nI can understand both text and voice commands!"
     };
   }
 
   private extractProductName(message: string): string {
-    // Extract product name from "add X to cart" messages
     const match = message.match(/add\s+(.+?)\s+to\s+cart/i);
     return match ? match[1].trim() : '';
   }
