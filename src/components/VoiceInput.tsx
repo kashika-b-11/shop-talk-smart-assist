@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Volume2, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         setIsLoading(false);
         setError(null);
         console.log('Voice recognition started');
-        speakText("I'm listening...");
         
         timeoutRef.current = setTimeout(() => {
           stopListening();
@@ -90,7 +90,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
           console.log('Final transcript:', transcript);
           
           if (transcript.trim()) {
-            speakText(`Processing: ${transcript}`);
             onVoiceInput(transcript);
           } else {
             setError('No speech detected. Please try again.');
@@ -131,11 +130,9 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         switch (event.error) {
           case 'no-speech':
             setError("I didn't hear anything. Please try again and speak clearly.");
-            speakText("I didn't hear anything. Please try again.");
             break;
           case 'network':
             setError("Network error. Please check your internet connection and try again.");
-            speakText("Network error. Please check your connection.");
             break;
           case 'not-allowed':
             setError("Microphone access denied. Please allow microphone permission.");
@@ -149,7 +146,6 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
             break;
           default:
             setError("Sorry, I couldn't understand. Please try again.");
-            speakText("Sorry, I couldn't understand. Please try again.");
         }
       };
 
@@ -173,32 +169,29 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
     }
   };
 
-  const speakText = (text: string) => {
+  const handleDemoSpeak = () => {
+    const demoMessages = [
+      "You can ask me to find products by saying:",
+      "Find diabetic snacks under 500 rupees",
+      "Show me wheelchairs",
+      "Search for organic rice",
+      "Add iPhone to cart",
+      "Remove rice from cart",
+      "Show my cart",
+      "What can I help you find today?"
+    ];
+    
+    const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];
+    
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(randomMessage);
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 0.8;
       utterance.lang = 'en-IN';
       speechSynthesis.speak(utterance);
     }
-  };
-
-  const handleDemoSpeak = () => {
-    const demoMessages = [
-      "Hi! I'm your Walmart shopping assistant. You can ask me to find products by saying:",
-      "Find Redmi Note 13 under 15000",
-      "Show me cotton kurtas",
-      "Search for basmati rice",
-      "Add iPhone to cart",
-      "Show my cart",
-      "What can I help you find today?"
-    ];
-    
-    const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];
-    speakText(randomMessage);
   };
 
   const retryVoiceRecognition = () => {
@@ -211,7 +204,7 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
       <div className="text-center space-y-4">
         <h3 className="text-lg font-semibold text-gray-900">Voice Shopping Assistant</h3>
         <p className="text-sm text-gray-600">
-          Tap the mic and say: "Find Redmi Note 13 under 15k" or "Show me kurtas"
+          Click the mic and say: "Find diabetic snacks under ₹500" or "Remove rice from cart"
         </p>
         
         {error && (

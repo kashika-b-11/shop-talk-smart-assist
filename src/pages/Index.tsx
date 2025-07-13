@@ -25,12 +25,12 @@ const Index = () => {
     navigate(`/search?q=${searchQuery}`);
   };
 
-  // Load initial featured products
+  // Load initial 50+ products
   useEffect(() => {
     const loadFeaturedProducts = async () => {
       try {
         const products = await getAllProducts();
-        setFeaturedProducts(products.slice(0, 8)); // Initial 8 products
+        setFeaturedProducts(products.slice(0, 50)); // Initial 50 products
       } catch (error) {
         console.error('Error loading featured products:', error);
       } finally {
@@ -41,12 +41,12 @@ const Index = () => {
     loadFeaturedProducts();
   }, []);
 
-  // Load more products for infinite scroll
+  // Load more products for infinite scroll (20 at a time)
   const loadMoreProducts = async (page: number): Promise<Product[]> => {
     try {
       const allProducts = await getAllProducts();
-      const startIndex = (page - 1) * 8;
-      const endIndex = startIndex + 8;
+      const startIndex = (page - 1) * 20;
+      const endIndex = startIndex + 20;
       return allProducts.slice(startIndex, endIndex);
     } catch (error) {
       console.error('Error loading more products:', error);
@@ -86,7 +86,7 @@ const Index = () => {
                 Your AI Shopping Assistant
               </h2>
               <p className="text-gray-600">
-                Chat or use voice to find exactly what you need. Try: "I need a smartphone under 30000"
+                Chat or use voice to find exactly what you need. Try: "Find diabetic snacks under ₹500"
               </p>
             </div>
             
@@ -108,7 +108,7 @@ const Index = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Products</h2>
             <InfiniteProductGrid
               initialProducts={featuredProducts}
-              onLoadMore={loadMoreProducts}
+              loadMoreProducts={loadMoreProducts}
               hasMore={true}
               gridLayout="large"
             />

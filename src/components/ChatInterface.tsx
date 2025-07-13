@@ -8,6 +8,7 @@ import { shopTalkService } from '@/services/shoptalkService';
 import { useNavigate } from 'react-router-dom';
 import ProductCards from './ProductCards';
 import { Product } from '@/types/product';
+import { useCart } from '@/contexts/CartContext';
 
 interface ChatMessage {
   id: string;
@@ -24,10 +25,11 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
   const navigate = useNavigate();
+  const { items: cartItems, getTotalItems, getTotalPrice } = useCart();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi! I'm ShopTalk, your AI shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Find iPhone under 30000' or 'Show me kurtas'\n• Add to cart: 'Add rice to cart'\n• Check cart: 'Show my cart'\n• Complete orders: 'Checkout'\n\nI understand both text and voice commands! What are you looking for today?",
+      text: "Hi! I'm ShopTalk, your AI shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Find diabetic snacks under ₹500' or 'Show me wheelchairs'\n• Manage cart: 'Add rice to cart' or 'Remove iPhone from cart'\n• Cart info: 'Show my cart' or 'What's in my cart?'\n• Product questions: 'Is this wheelchair covered by insurance?'\n\nI understand both text and voice commands! What are you looking for today?",
       isUser: false,
       timestamp: new Date()
     }
@@ -49,6 +51,70 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
     setIsProcessing(true);
 
     try {
+      // Handle cart-specific queries
+      if (inputValue.toLowerCase().includes('show cart') || 
+          inputValue.toLowerCase().includes('my cart') ||
+          inputValue.toLowerCase().includes('cart items')) {
+        
+        let cartResponse = '';
+        if (cartItems.length === 0) {
+          cartResponse = "🛒 Your cart is empty. Browse products and add items to get started! Try searching for items like 'Find iPhone' or 'Show me rice options'.";
+        } else {
+          const cartSummary = cartItems.map((item, index) => 
+            `${index + 1}. ${item.name} - ₹${item.price.toLocaleString()} x ${item.quantity} = ₹${(item.price * item.quantity).toLocaleString()}`
+          ).join('\n');
+          
+          cartResponse = `🛒 Your Cart (${getTotalItems()} items):\n\n${cartSummary}\n\n💰 Total: ₹${getTotalPrice().toLocaleString()}\n\nSay "checkout" to proceed to payment or ask me to remove specific items.`;
+        }
+
+        setTimeout(() => {
+          const assistantMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            text: cartResponse,
+            isUser: false,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          setIsProcessing(false);
+        }, 500);
+        
+        setInputValue('');
+        return;
+      }
+
+      // Handle product questions
+      if (inputValue.toLowerCase().includes('insurance') || 
+          inputValue.toLowerCase().includes('warranty') ||
+          inputValue.toLowerCase().includes('return policy') ||
+          inputValue.toLowerCase().includes('shipping')) {
+        
+        let questionResponse = '';
+        if (inputValue.toLowerCase().includes('insurance')) {
+          questionResponse = "Medical equipment like wheelchairs may be covered by insurance depending on your policy. I recommend:\n• Check with your insurance provider\n• Get a prescription from your doctor\n• Look for products marked as 'Insurance Eligible'\n• Contact our customer service for assistance with insurance claims.";
+        } else if (inputValue.toLowerCase().includes('warranty')) {
+          questionResponse = "Most products come with manufacturer warranty:\n• Electronics: 1-2 years\n• Appliances: 1-5 years depending on brand\n• Fashion items: 30-day exchange\n• Check individual product pages for specific warranty details.";
+        } else if (inputValue.toLowerCase().includes('return')) {
+          questionResponse = "Our return policy:\n• 30-day return window\n• Products must be unused and in original packaging\n• Free returns for orders above ₹499\n• Refund processed within 5-7 business days.";
+        } else if (inputValue.toLowerCase().includes('shipping')) {
+          questionResponse = "Shipping information:\n• Free delivery on orders above ₹499\n• Standard delivery: 2-5 business days\n• Express delivery: 1-2 business days (additional charges)\n• Same-day delivery available in select cities.";
+        }
+
+        setTimeout(() => {
+          const assistantMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            text: questionResponse,
+            isUser: false,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          setIsProcessing(false);
+        }, 800);
+        
+        setInputValue('');
+        return;
+      }
+
+      // Use the existing shopTalkService for other queries
       const result = await shopTalkService.processMessage(inputValue);
       
       if (result.shouldNavigate && result.navigationPath) {
@@ -78,7 +144,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       console.error('Error processing message:', error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble processing your request right now. Please try again with a different search term.",
+        text: "I'm having trouble processing your request right now. Please try again with a different search term or question.",
         isUser: false,
         timestamp: new Date()
       };
@@ -156,7 +222,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Input
-            placeholder="Try: 'Find Redmi Note 13 under 15k' or 'Show my cart'"
+            placeholder="Try: 'Find diabetic snacks under ₹500' or 'Show my cart'"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
