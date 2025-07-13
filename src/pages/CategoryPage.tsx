@@ -11,7 +11,7 @@ const CategoryPage = () => {
   
   const loadMoreProducts = async (page: number, limit: number = 8) => {
     if (!category) return [];
-    return await getProductsByCategory(category, page, limit);
+    return await getProductsByCategory(category, { page, limit });
   };
 
   const categoryDisplayName = category?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Category';

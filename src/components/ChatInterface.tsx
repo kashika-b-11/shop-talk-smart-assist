@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Send, MessageCircle, ShoppingCart, Compare } from 'lucide-react';
+import { Send, MessageCircle, ShoppingCart, GitCompare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -222,7 +221,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
           <ShoppingCart size={20} />
           <h3 className="font-semibold">Walmart Shopping Assistant</h3>
           <div className="ml-auto flex items-center space-x-2">
-            <Compare size={16} />
+            <GitCompare size={16} />
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
           </div>
         </div>
@@ -264,7 +263,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
                       onClick={() => navigate(`/compare?products=${message.products?.slice(0, 3).map(p => p.id).join(',')}`)}
                       className="text-[#0071CE] border-[#0071CE]"
                     >
-                      <Compare className="w-4 h-4 mr-1" />
+                      <GitCompare className="w-4 h-4 mr-1" />
                       Compare Selected Products
                     </Button>
                   </div>
@@ -273,6 +272,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
             )}
           </div>
         ))}
+
         {(isLoading || isProcessing) && (
           <div className="flex justify-start">
             <div className="bg-gray-100 p-3 rounded-lg">
