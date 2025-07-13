@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Send, MessageCircle, ShoppingCart } from 'lucide-react';
+import { Send, MessageCircle, ShoppingCart, Compare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -16,6 +16,7 @@ interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
   products?: Product[];
+  type?: 'product_info' | 'comparison' | 'general' | 'cart';
 }
 
 interface ChatInterfaceProps {
@@ -29,13 +30,74 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi! I'm ShopTalk, your AI shopping assistant. 🛒\n\nI can help you:\n• Find products: 'Find diabetic snacks under ₹500' or 'Show me wheelchairs'\n• Manage cart: 'Add rice to cart' or 'Remove iPhone from cart'\n• Cart info: 'Show my cart' or 'What's in my cart?'\n• Product questions: 'Is this wheelchair covered by insurance?'\n\nI understand both text and voice commands! What are you looking for today?",
+      text: "Hi! I'm your Walmart Shopping Assistant! 🛒✨\n\nI can help you with:\n🔍 Product Search: 'Find diabetic snacks under ₹500'\n🛒 Cart Management: 'Add rice to cart' or 'Remove iPhone'\n📊 Product Comparison: 'Compare iPhone 13 vs Samsung Galaxy'\n💡 Product Questions: 'What are the specifications of OnePlus Nord?'\n📦 Order Info: 'Track my order' or 'Return policy'\n💰 Deals & Offers: 'Show me today's deals'\n🚚 Delivery Info: 'Delivery options to my area'\n\nWhat would you like to know today?",
       isUser: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      type: 'general'
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const getEnhancedProductResponse = (query: string, products: Product[]) => {
+    const queryLower = query.toLowerCase();
+    
+    if (queryLower.includes('specification') || queryLower.includes('features') || queryLower.includes('details')) {
+      return `📱 Here are the detailed specifications and features for your search:\n\n✅ Found ${products.length} products matching your criteria`;
+    }
+    
+    if (queryLower.includes('compare')) {
+      return `🔍 Product Comparison Results:\n\nI found ${products.length} products for comparison. You can compare features, prices, and specifications side by side.`;
+    }
+    
+    if (queryLower.includes('deal') || queryLower.includes('offer') || queryLower.includes('discount')) {
+      return `🎯 Special Deals & Offers Found:\n\n💰 ${products.length} products with great discounts available!`;
+    }
+    
+    return `🎯 Search Results:\n\nFound ${products.length} relevant products matching "${query}". All items include detailed descriptions, accurate images, and current pricing.`;
+  };
+
+  const handleAdvancedQueries = (query: string): string | null => {
+    const queryLower = query.toLowerCase();
+    
+    // Product specification queries
+    if (queryLower.includes('specification') || queryLower.includes('specs') || queryLower.includes('features')) {
+      if (queryLower.includes('iphone') || queryLower.includes('phone')) {
+        return "📱 iPhone Specifications:\n• Display: 6.1-inch Liquid Retina\n• Chip: A15 Bionic\n• Camera: 12MP dual system\n• Battery: All-day battery life\n• Storage: 128GB, 256GB, 512GB\n• Colors: Multiple options available\n• Water resistance: IP68\n• 5G connectivity enabled";
+      }
+      
+      if (queryLower.includes('laptop') || queryLower.includes('computer')) {
+        return "💻 Laptop Specifications:\n• Processor: Intel Core i5/i7 or AMD Ryzen\n• RAM: 8GB-32GB options\n• Storage: SSD 256GB-1TB\n• Display: 13-17 inch options\n• Graphics: Integrated or dedicated\n• Battery: 6-12 hours\n• Ports: USB-C, USB-A, HDMI\n• Operating System: Windows 11 or macOS";
+      }
+    }
+    
+    // Comparison queries
+    if (queryLower.includes('compare') || queryLower.includes('vs') || queryLower.includes('difference')) {
+      return "🔍 Product Comparison Guide:\n\n✅ I can help you compare:\n• Price differences across brands\n• Feature specifications\n• Customer ratings & reviews\n• Warranty & support options\n• Delivery timeframes\n• Return policies\n\n💡 Try: 'Compare iPhone 13 vs Samsung Galaxy' or 'OnePlus vs Redmi phones'";
+    }
+    
+    // Delivery and shipping queries
+    if (queryLower.includes('delivery') || queryLower.includes('shipping') || queryLower.includes('when will')) {
+      return "🚚 Delivery Information:\n\n📦 Standard Delivery: 2-5 business days\n⚡ Express Delivery: 1-2 business days\n🏃 Same-day: Available in select metro cities\n💸 Free delivery on orders ₹499+\n📍 Delivery available across India\n📞 Real-time tracking provided\n\n🕐 Order before 6 PM for next-day delivery (express)";
+    }
+    
+    // Return and warranty queries
+    if (queryLower.includes('return') || queryLower.includes('exchange') || queryLower.includes('warranty')) {
+      return "🔄 Return & Warranty Policy:\n\n↩️ Easy Returns:\n• 30-day return window\n• No questions asked policy\n• Free pickup from your location\n• Instant refund processing\n\n🛡️ Warranty Coverage:\n• Electronics: 1-2 years manufacturer warranty\n• Appliances: 1-5 years based on product\n• Fashion: 30-day exchange\n• Extended warranty options available";
+    }
+    
+    // Payment and offers
+    if (queryLower.includes('payment') || queryLower.includes('offers') || queryLower.includes('cashback')) {
+      return "💳 Payment & Offers:\n\n💰 Payment Options:\n• Credit/Debit Cards\n• UPI (PhonePe, GPay, Paytm)\n• Net Banking\n• Cash on Delivery\n• EMI options available\n\n🎁 Current Offers:\n• 10% cashback on HDFC cards\n• No-cost EMI on orders ₹10,000+\n• Extra 5% off on app purchases\n• Buy 2 Get 1 offers on select items";
+    }
+    
+    // Insurance and coverage
+    if (queryLower.includes('insurance') || queryLower.includes('cover')) {
+      return "🛡️ Insurance & Protection:\n\n📱 Device Protection:\n• Accidental damage coverage\n• Liquid damage protection\n• Theft protection available\n• Extended warranty plans\n\n🏥 Health Products:\n• Many items eligible for insurance claims\n• HSA/FSA accepted for medical equipment\n• Prescription required for certain items\n• Consult your insurance provider for coverage details";
+    }
+    
+    return null;
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim() || isProcessing) return;
@@ -51,20 +113,38 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
     setIsProcessing(true);
 
     try {
-      // Handle cart-specific queries
+      // Check for advanced queries first
+      const advancedResponse = handleAdvancedQueries(inputValue);
+      if (advancedResponse) {
+        setTimeout(() => {
+          const assistantMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            text: advancedResponse,
+            isUser: false,
+            timestamp: new Date(),
+            type: 'general'
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          setIsProcessing(false);
+        }, 800);
+        setInputValue('');
+        return;
+      }
+
+      // Handle cart queries
       if (inputValue.toLowerCase().includes('show cart') || 
           inputValue.toLowerCase().includes('my cart') ||
           inputValue.toLowerCase().includes('cart items')) {
         
         let cartResponse = '';
         if (cartItems.length === 0) {
-          cartResponse = "🛒 Your cart is empty. Browse products and add items to get started! Try searching for items like 'Find iPhone' or 'Show me rice options'.";
+          cartResponse = "🛒 Your cart is empty.\n\n💡 Start shopping by searching for items like:\n• 'Find iPhone under ₹30000'\n• 'Show me rice options'\n• 'Latest deals on electronics'\n\n🎯 I can help you find exactly what you need!";
         } else {
           const cartSummary = cartItems.map((item, index) => 
-            `${index + 1}. ${item.name} - ₹${item.price.toLocaleString()} x ${item.quantity} = ₹${(item.price * item.quantity).toLocaleString()}`
-          ).join('\n');
+            `${index + 1}. ${item.name}\n   ₹${item.price.toLocaleString()} x ${item.quantity} = ₹${(item.price * item.quantity).toLocaleString()}`
+          ).join('\n\n');
           
-          cartResponse = `🛒 Your Cart (${getTotalItems()} items):\n\n${cartSummary}\n\n💰 Total: ₹${getTotalPrice().toLocaleString()}\n\nSay "checkout" to proceed to payment or ask me to remove specific items.`;
+          cartResponse = `🛒 Your Shopping Cart (${getTotalItems()} items):\n\n${cartSummary}\n\n💰 Total Amount: ₹${getTotalPrice().toLocaleString()}\n\n✅ Ready to checkout? Say "proceed to checkout"\n🔄 Want to modify? Say "remove [item name]"`;
         }
 
         setTimeout(() => {
@@ -72,7 +152,8 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
             id: (Date.now() + 1).toString(),
             text: cartResponse,
             isUser: false,
-            timestamp: new Date()
+            timestamp: new Date(),
+            type: 'cart'
           };
           setMessages(prev => [...prev, assistantMessage]);
           setIsProcessing(false);
@@ -82,39 +163,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
         return;
       }
 
-      // Handle product questions
-      if (inputValue.toLowerCase().includes('insurance') || 
-          inputValue.toLowerCase().includes('warranty') ||
-          inputValue.toLowerCase().includes('return policy') ||
-          inputValue.toLowerCase().includes('shipping')) {
-        
-        let questionResponse = '';
-        if (inputValue.toLowerCase().includes('insurance')) {
-          questionResponse = "Medical equipment like wheelchairs may be covered by insurance depending on your policy. I recommend:\n• Check with your insurance provider\n• Get a prescription from your doctor\n• Look for products marked as 'Insurance Eligible'\n• Contact our customer service for assistance with insurance claims.";
-        } else if (inputValue.toLowerCase().includes('warranty')) {
-          questionResponse = "Most products come with manufacturer warranty:\n• Electronics: 1-2 years\n• Appliances: 1-5 years depending on brand\n• Fashion items: 30-day exchange\n• Check individual product pages for specific warranty details.";
-        } else if (inputValue.toLowerCase().includes('return')) {
-          questionResponse = "Our return policy:\n• 30-day return window\n• Products must be unused and in original packaging\n• Free returns for orders above ₹499\n• Refund processed within 5-7 business days.";
-        } else if (inputValue.toLowerCase().includes('shipping')) {
-          questionResponse = "Shipping information:\n• Free delivery on orders above ₹499\n• Standard delivery: 2-5 business days\n• Express delivery: 1-2 business days (additional charges)\n• Same-day delivery available in select cities.";
-        }
-
-        setTimeout(() => {
-          const assistantMessage: ChatMessage = {
-            id: (Date.now() + 1).toString(),
-            text: questionResponse,
-            isUser: false,
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, assistantMessage]);
-          setIsProcessing(false);
-        }, 800);
-        
-        setInputValue('');
-        return;
-      }
-
-      // Use the existing shopTalkService for other queries
+      // Use existing shopTalkService for other queries
       const result = await shopTalkService.processMessage(inputValue);
       
       if (result.shouldNavigate && result.navigationPath) {
@@ -125,9 +174,11 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
 
       setTimeout(() => {
         let responseText = result.response;
+        let messageType: ChatMessage['type'] = 'general';
         
-        if (inputValue.toLowerCase().includes('find') || inputValue.toLowerCase().includes('search')) {
-          responseText = `🎯 ${responseText}`;
+        if (result.products && result.products.length > 0) {
+          responseText = getEnhancedProductResponse(inputValue, result.products);
+          messageType = inputValue.toLowerCase().includes('compare') ? 'comparison' : 'product_info';
         }
 
         const assistantMessage: ChatMessage = {
@@ -135,7 +186,8 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
           text: responseText,
           isUser: false,
           timestamp: new Date(),
-          products: result.products && result.products.length > 0 ? result.products : undefined
+          products: result.products && result.products.length > 0 ? result.products : undefined,
+          type: messageType
         };
         setMessages(prev => [...prev, assistantMessage]);
         setIsProcessing(false);
@@ -144,9 +196,10 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       console.error('Error processing message:', error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble processing your request right now. Please try again with a different search term or question.",
+        text: "I apologize, but I'm having trouble processing your request right now. Please try again or rephrase your question. I'm here to help with:\n\n• Product searches\n• Cart management\n• Product comparisons\n• Specifications & details\n• Delivery information\n• Return policies",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        type: 'general'
       };
       setMessages(prev => [...prev, errorMessage]);
       setIsProcessing(false);
@@ -167,8 +220,9 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-b bg-[#0071CE] text-white rounded-t-lg">
         <div className="flex items-center space-x-2">
           <ShoppingCart size={20} />
-          <h3 className="font-semibold">ShopTalk Assistant</h3>
-          <div className="ml-auto">
+          <h3 className="font-semibold">Walmart Shopping Assistant</h3>
+          <div className="ml-auto flex items-center space-x-2">
+            <Compare size={16} />
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
           </div>
         </div>
@@ -199,8 +253,21 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
                 <ProductCards products={message.products.slice(0, 6)} layout="list" />
                 {message.products.length > 6 && (
                   <p className="text-xs text-gray-500 mt-2 ml-2">
-                    Showing first 6 results. Search for more specific terms for better results.
+                    Showing first 6 results. Ask for more specific terms for additional results.
                   </p>
+                )}
+                {message.type === 'comparison' && (
+                  <div className="mt-2 ml-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/compare?products=${message.products?.slice(0, 3).map(p => p.id).join(',')}`)}
+                      className="text-[#0071CE] border-[#0071CE]"
+                    >
+                      <Compare className="w-4 h-4 mr-1" />
+                      Compare Selected Products
+                    </Button>
+                  </div>
                 )}
               </div>
             )}
@@ -222,7 +289,7 @@ const ChatInterface = ({ onSearch, isLoading }: ChatInterfaceProps) => {
       <div className="p-4 border-t">
         <div className="flex space-x-2">
           <Input
-            placeholder="Try: 'Find diabetic snacks under ₹500' or 'Show my cart'"
+            placeholder="Try: 'Compare iPhone vs Samsung' or 'Specifications of OnePlus Nord'"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}

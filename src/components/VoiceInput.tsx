@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { Mic, MicOff, Volume2, AlertCircle, Wifi, WifiOff, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -169,29 +169,25 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
     }
   };
 
-  const handleDemoSpeak = () => {
-    const demoMessages = [
-      "You can ask me to find products by saying:",
-      "Find diabetic snacks under 500 rupees",
+  // Show example commands without automatic speech
+  const showExampleCommands = () => {
+    const examples = [
+      "Find diabetic snacks under ₹500",
       "Show me wheelchairs",
-      "Search for organic rice",
-      "Add iPhone to cart",
-      "Remove rice from cart",
-      "Show my cart",
-      "What can I help you find today?"
+      "Add rice to cart",
+      "Remove iPhone from cart",
+      "Compare OnePlus vs Samsung",
+      "What are the specifications of this laptop?"
     ];
     
-    const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];
+    setError(null);
     
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(randomMessage);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
-      utterance.lang = 'en-IN';
-      speechSynthesis.speak(utterance);
-    }
+    // Display examples as a helpful message
+    const exampleText = "🎤 Try these voice commands:\n\n" + 
+      examples.map((cmd, i) => `${i + 1}. "${cmd}"`).join('\n');
+    
+    // You could show this in a tooltip or temporary message
+    console.log('Voice command examples:', examples);
   };
 
   const retryVoiceRecognition = () => {
@@ -202,9 +198,9 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
   return (
     <Card className="p-6">
       <div className="text-center space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Voice Shopping Assistant</h3>
+        <h3 className="text-lg font-semibold text-gray-900">🎤 Voice Shopping Assistant</h3>
         <p className="text-sm text-gray-600">
-          Click the mic and say: "Find diabetic snacks under ₹500" or "Remove rice from cart"
+          Click the microphone and say commands like: "Find diabetic snacks under ₹500" or "Add rice to cart"
         </p>
         
         {error && (
@@ -256,14 +252,14 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
           </Button>
           
           <Button
-            onClick={handleDemoSpeak}
+            onClick={showExampleCommands}
             size="lg"
             variant="outline"
             className="rounded-full w-16 h-16"
-            title="Hear voice examples"
+            title="Show voice command examples"
             disabled={isLoading}
           >
-            <Volume2 size={24} />
+            <MessageSquare size={24} />
           </Button>
 
           {error && hasPermission !== false && (
@@ -283,7 +279,7 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
         {transcript && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <p className="text-sm text-gray-700">
-              <span className="font-medium">Listening:</span> {transcript}
+              <span className="font-medium">🎯 Listening:</span> {transcript}
             </p>
           </div>
         )}
@@ -296,15 +292,28 @@ const VoiceInput = ({ onVoiceInput }: VoiceInputProps) => {
               <div className="w-2 h-10 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
               <div className="w-2 h-4 bg-[#0071CE] rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
             </div>
-            <p className="text-xs text-gray-500">Speak clearly and naturally...</p>
+            <p className="text-xs text-gray-500">🎤 Speak clearly and naturally... (auto-stops in 10s)</p>
           </div>
         )}
 
         {hasPermission === null && isSupported && (
           <div className="text-xs text-gray-500">
-            Click the microphone to start. You may be asked for permission to use your microphone.
+            💡 Click the microphone to start. You may be asked for permission to use your microphone.
           </div>
         )}
+
+        {/* Voice Command Examples */}
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg text-left">
+          <h4 className="font-medium text-sm mb-2">🗣️ Voice Command Examples:</h4>
+          <ul className="text-xs text-gray-600 space-y-1">
+            <li>• "Find diabetic snacks under ₹500"</li>
+            <li>• "Show me electronics under ₹20000"</li>
+            <li>• "Add iPhone to my cart"</li>
+            <li>• "Compare OnePlus vs Samsung phones"</li>
+            <li>• "What are laptop specifications?"</li>
+            <li>• "Show my cart items"</li>
+          </ul>
+        </div>
       </div>
     </Card>
   );
