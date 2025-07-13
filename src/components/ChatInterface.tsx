@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
-import { getAllProducts } from '@/services/productService';
+import { searchProducts } from '@/services/productService';
 import { Product } from '@/types/product';
 import ProductImage from './ProductImage';
 
@@ -46,35 +46,20 @@ const ChatInterface = ({ onSearch, isLoading, compact = false }: ChatInterfacePr
     scrollToBottom();
   }, [chatHistory]);
 
-  const searchProducts = async (query: string): Promise<Product[]> => {
-    try {
-      const allProducts = await getAllProducts();
-      const searchTerm = query.toLowerCase();
-      
-      return allProducts.filter(product => 
-        product.name.toLowerCase().includes(searchTerm) ||
-        product.category?.toLowerCase().includes(searchTerm) ||
-        product.description?.toLowerCase().includes(searchTerm)
-      ).slice(0, 6); // Limit to 6 products for chat display
-    } catch (error) {
-      console.error('Error searching products:', error);
-      return [];
-    }
-  };
-
   const generateResponse = async (userMessage: string): Promise<{ content: string; products?: Product[] }> => {
     const message = userMessage.toLowerCase();
     
     // Product search queries
     if (message.includes('find') || message.includes('search') || message.includes('show') || 
-        message.includes('looking for') || message.includes('need') || message.includes('want')) {
+        message.includes('looking for') || message.includes('need') || message.includes('want') ||
+        message.includes('buy') || message.includes('get')) {
       
       const products = await searchProducts(userMessage);
       
       if (products.length > 0) {
         return {
-          content: `I found ${products.length} products that match your search. Here are some great options:`,
-          products
+          content: `I found ${products.length > 6 ? '6+' : products.length} products that match your search. Here are some great options:`,
+          products: products.slice(0, 6)
         };
       } else {
         return {
@@ -84,35 +69,35 @@ const ChatInterface = ({ onSearch, isLoading, compact = false }: ChatInterfacePr
     }
     
     // Category-based responses
-    if (message.includes('electronics')) {
-      const products = await searchProducts('electronics');
+    if (message.includes('electronics') || message.includes('phone') || message.includes('laptop') || message.includes('computer')) {
+      const products = await searchProducts('electronics smartphone laptop');
       return {
         content: "Here are some popular electronics from our store:",
-        products
+        products: products.slice(0, 6)
       };
     }
     
-    if (message.includes('fashion') || message.includes('clothes') || message.includes('clothing')) {
-      const products = await searchProducts('fashion');
+    if (message.includes('fashion') || message.includes('clothes') || message.includes('clothing') || message.includes('shirt') || message.includes('dress')) {
+      const products = await searchProducts('fashion clothes shirt dress');
       return {
         content: "Check out these fashion items:",
-        products
+        products: products.slice(0, 6)
       };
     }
     
-    if (message.includes('home') || message.includes('kitchen')) {
-      const products = await searchProducts('home');
+    if (message.includes('home') || message.includes('kitchen') || message.includes('furniture')) {
+      const products = await searchProducts('home kitchen furniture');
       return {
         content: "Here are some great home and kitchen products:",
-        products
+        products: products.slice(0, 6)
       };
     }
     
-    if (message.includes('groceries') || message.includes('food')) {
-      const products = await searchProducts('groceries');
+    if (message.includes('beauty') || message.includes('skincare') || message.includes('makeup')) {
+      const products = await searchProducts('beauty skincare makeup');
       return {
-        content: "Fresh groceries and food items for you:",
-        products
+        content: "Here are some popular beauty products:",
+        products: products.slice(0, 6)
       };
     }
     
@@ -136,10 +121,19 @@ const ChatInterface = ({ onSearch, isLoading, compact = false }: ChatInterfacePr
     }
     
     if (message.includes('price') || message.includes('cost') || message.includes('cheap') || message.includes('affordable')) {
-      const products = await searchProducts(userMessage);
+      const products = await searchProducts('cheap affordable budget');
       return {
         content: "Here are some great value products that might interest you:",
-        products: products.sort((a, b) => a.price - b.price)
+        products: products.sort((a, b) => a.price - b.price).slice(0, 6)
+      };
+    }
+    
+    // If no specific intent detected, try a general search
+    const products = await searchProducts(userMessage);
+    if (products.length > 0) {
+      return {
+        content: "Here are some products related to your query:",
+        products: products.slice(0, 6)
       };
     }
     
@@ -202,7 +196,7 @@ const ChatInterface = ({ onSearch, isLoading, compact = false }: ChatInterfacePr
     { label: 'Electronics', icon: Package },
     { label: 'Fashion', icon: Package },
     { label: 'Home & Kitchen', icon: Package },
-    { label: 'Groceries', icon: ShoppingCart }
+    { label: 'Beauty', icon: ShoppingCart }
   ];
 
   if (compact) {
@@ -281,7 +275,7 @@ const ChatInterface = ({ onSearch, isLoading, compact = false }: ChatInterfacePr
                           <ProductImage
                             productName={product.name}
                             category={product.category}
-                            className="w-full h-24 object-cover rounded"
+                            className="w-full h-24 rounded"
                             alt={product.name}
                             fallbackImage={product.image}
                           />
