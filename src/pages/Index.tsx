@@ -21,8 +21,7 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     console.log('Searching for:', query);
-    const searchQuery = encodeURIComponent(query);
-    navigate(`/search?q=${searchQuery}`);
+    // Don't navigate, let the chat interface handle the search
   };
 
   // Load initial 50+ products
@@ -58,61 +57,8 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Header />
       
-      {/* Hero Section with gradient background like Walmart */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 text-white">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative container mx-auto px-4 py-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div className="space-y-6">
-                <div className="inline-block bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                  SALE
-                </div>
-                <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                  Smart Shopping<br />
-                  <span className="text-yellow-300">Assistant</span>
-                </h1>
-                <p className="text-xl text-blue-100 mb-6">
-                  Limited time offer - AI-powered shopping experience
-                </p>
-                <div className="text-2xl font-bold">
-                  From <span className="text-yellow-300">₹1,34,900</span>
-                  <span className="text-lg text-blue-200 line-through ml-3">₹1,59,900</span>
-                </div>
-              </div>
-
-              {/* AI Assistant Card */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-[#0071CE] rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">AI</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Walmart AI Assistant</h3>
-                      <p className="text-sm text-gray-600">Online now</p>
-                    </div>
-                  </div>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <p className="text-gray-700 text-sm">
-                    Hello! I'm your Walmart shopping assistant. I can help you find products, manage your cart, and answer questions. Try asking me anything!
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <ChatInterface onSearch={handleSearch} isLoading={false} compact={true} />
-                  <VoiceInput onVoiceInput={handleSearch} compact={true} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Hero Banner */}
+      <HeroBanner />
       
       {/* Services Bar */}
       <div className="bg-gray-50 border-b border-gray-200 py-4">
@@ -133,6 +79,27 @@ const Index = () => {
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto space-y-12">
+            
+            {/* AI Assistant Section */}
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <div className="flex items-center justify-center mb-8">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-[#0071CE] rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">AI</span>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Walmart AI Assistant</h2>
+                    <p className="text-gray-600">Ask me anything about products, get recommendations, and more!</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid lg:grid-cols-2 gap-8">
+                <ChatInterface onSearch={handleSearch} isLoading={false} />
+                <VoiceInput onVoiceInput={handleSearch} />
+              </div>
+            </div>
+
             <CategoryGrid />
             <DealsSection />
             
